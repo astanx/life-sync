@@ -9,8 +9,17 @@ import (
 )
 
 func ConnectDB() *gorm.DB {
+
+	config.LoadEnv()
+
+	user := config.GetEnv("user")
+	pass := config.GetEnv("password")
+	host := config.GetEnv("host")
+	port := config.GetEnv("port")
+	dbname := config.GetEnv("dbname")
+
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		config.DB_HOST, config.DB_USER, config.DB_PASSWORD, config.DB_NAME, config.DB_PORT)
+		host, user, pass, dbname, port)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

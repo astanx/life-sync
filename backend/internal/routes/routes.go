@@ -69,8 +69,8 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Здесь вы можете создать JWT токен и вернуть его пользователю
-		// Например, используя библиотеку "github.com/dgrijalva/jwt-go"
+		// JWT
+		// github.com/dgrijalva/jwt-go
 		// ...
 
 		c.JSON(http.StatusOK, gin.H{"message": "login successful"})
