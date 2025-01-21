@@ -3,8 +3,10 @@ package routes
 import (
 	"lifeSync/internal/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -30,7 +32,22 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "user registered successfully"})
+		token := jwt.New(jwt.SigningMethodHS256)
+		claims := token.Claims.(jwt.MapClaims)
+		claims["userid"] = user.ID
+		claims["username"] = user.Username
+		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+		tokenString, err := token.SignedString(mySigningKey)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "user registered successfully",
+			"token":   tokenString,
+		})
 	}
 }
 
@@ -54,6 +71,18 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "login successful"})
+		token := jwt.New(jwt.SigningMethodHS256)
+		claims := token.Claims.(jwt.MapClaims)
+		claims["userid"] = foundUser.ID
+		claims["username"] = foundUser.Username
+		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+		tokenString, err := token.SignedString(mySigningKey)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	}
 }
