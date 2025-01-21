@@ -85,6 +85,7 @@ func createToken(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request struct {
 			Username string `json:"username"`
+			Userid   uint   `json:"userid"`
 		}
 
 		if err := c.ShouldBindJSON(&request); err != nil {
@@ -95,7 +96,7 @@ func createToken(db *gorm.DB) gin.HandlerFunc {
 		token := jwt.New(jwt.SigningMethodHS256)
 
 		claims := token.Claims.(jwt.MapClaims)
-		claims["username"] = request.Username
+		claims["userid"] = request.Userid
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 		tokenString, err := token.SignedString(mySigningKey)
@@ -104,7 +105,7 @@ func createToken(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.WithContext(c).Create(&models.Token{Token: tokenString, Userid: 2}).Error; err != nil {
+		if err := db.WithContext(c).Create(&models.Token{Token: tokenString, Userid: request.Userid}).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create token"})
 			return
 		}
