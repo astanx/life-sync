@@ -1,9 +1,6 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-config
+  name: lifesync-config
 data:
-  DB_HOST: "your-db-host"
-  DB_USER: "your-db-user"
-  DB_PASSWORD: "your-db-password"
-  DB_NAME: "your-db-name"
+  DATABASE_URL: "host=aws-0-eu-central-1.pooler.supabase.com user=postgres.oeccgbwgpvljurgzpshq password=QDHyOUgjWXdYfsgK dbname=postgres port=6543 sslmode=disable"

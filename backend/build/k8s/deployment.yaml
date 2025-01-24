@@ -13,10 +13,10 @@ spec:
         app: lifesync
     spec:
       containers:
-      - name: lifesync
-        image: lifesync-backend:latest  
-        ports:
-        - containerPort: 8080  
-        envFrom:
-          - configMapRef:
-              name: lifesync-config
+        - name: lifesync
+          image: fox2893/lifesync-backend:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: lifesync-config

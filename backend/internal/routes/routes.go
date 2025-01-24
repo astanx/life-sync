@@ -10,8 +10,9 @@ import (
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	apiRoutes := r.Group("/api")
 	{
-		apiRoutes.POST("/register", RegisterUser(db))
-		apiRoutes.POST("/login", LoginUser(db))
+		apiRoutes.POST("/user", RegisterUser(db))
+		apiRoutes.GET("/user", LoginUser(db))
+		apiRoutes.PUT("/user/:id", UpdateUser(db))
 		apiRoutes.GET("/createJWT", CreateToken(db))
 		apiRoutes.GET("/validateJWT", ValidateToken(db))
 	}
