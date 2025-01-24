@@ -1,0 +1,6 @@
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: build/Dockerfile
+    env_file: ../.env
