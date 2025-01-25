@@ -13,6 +13,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		apiRoutes.POST("/user", RegisterUser(db))
 		apiRoutes.GET("/user", LoginUser(db))
 		apiRoutes.PUT("/user/:id", UpdateUser(db))
+		apiRoutes.DELETE("/user/:id", DeleteUser(db))
 		apiRoutes.GET("/createJWT", CreateToken(db))
 		apiRoutes.GET("/validateJWT", ValidateToken(db))
 	}

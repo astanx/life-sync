@@ -103,14 +103,30 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Обновляем только те поля, которые хотим изменить
 		if err := db.Model(&user).Where("id = ?", user.ID).Select("username").Updates(updatedUser).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 			return
 		}
 
-		// Если хотите вернуть обновленную информацию о пользователе, обновляя ее
-		user.Username = updatedUser.Username // Применяем обновленные данные
-		c.JSON(http.StatusOK, gin.H{"username": user.Username})
+		c.JSON(http.StatusOK, gin.H{"username": updatedUser.Username})
+	}
+}
+
+func DeleteUser(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var user models.User
+		userID := c.Param("id")
+
+		if err := db.First(&user, userID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
+		if err := db.Delete(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Deleted successfully"})
 	}
 }
