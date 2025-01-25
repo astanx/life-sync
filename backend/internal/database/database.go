@@ -11,7 +11,6 @@ import (
 )
 
 func ConnectDB() *gorm.DB {
-	// Загрузка переменных окружения
 	config.LoadEnv()
 
 	user := config.GetEnv("user")
@@ -20,16 +19,14 @@ func ConnectDB() *gorm.DB {
 	port := config.GetEnv("port")
 	dbname := config.GetEnv("dbname")
 
-	// Формирование строки подключения
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		host, user, pass, dbname, port)
 
-	// Конфигурация GORM
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
-		PreferSimpleProtocol: true, // Отключить кэширование подготовленных выражений
+		PreferSimpleProtocol: true,
 	}), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info), // Логирование SQL-запросов
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
