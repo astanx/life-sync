@@ -15,8 +15,12 @@ spec:
       containers:
         - name: lifesync
           image: fox2893/lifesync-backend:latest
+          env:
+          - name: PORT
+            value: "8080"
           ports:
             - containerPort: 8080
+          
           envFrom:
             - configMapRef:
                 name: lifesync-config
