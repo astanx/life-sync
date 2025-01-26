@@ -5,8 +5,6 @@ import (
 	"lifeSync/internal/database"
 	"lifeSync/internal/routes"
 
-	"log"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +17,7 @@ func main() {
 
 	port := config.GetEnv("port")
 	if port == "" {
-		log.Fatal("PORT environment variable is not set")
+		port = "8080"
 	}
 
 	r.Run(":" + port)
