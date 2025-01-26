@@ -1,3 +1,2 @@
 .env
 build/k8s/configmap.yaml
-.vercel
