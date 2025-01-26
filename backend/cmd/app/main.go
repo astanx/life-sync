@@ -15,7 +15,7 @@ func main() {
 	r := gin.Default()
 	routes.SetupRoutes(r, db)
 
-	port := config.GetEnv("port")
+	port := config.GetEnv("PORT")
 	if port == "" {
 		port = "8080"
 	}
