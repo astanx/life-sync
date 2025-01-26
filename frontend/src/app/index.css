@@ -1,1 +1,10 @@
-@tailwind utilities;
+:root {
+    --primary: #4F46E5;
+    --primary-dark: #3730A3;
+    --primary-darkest: #312E81;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #eee;
+}

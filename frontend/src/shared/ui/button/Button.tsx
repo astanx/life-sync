@@ -1,15 +1,17 @@
-import { FC } from 'react'
+import { FC, ReactNode } from "react";
+import classes from "./Button.module.css";
 
 interface Props {
-    title: string
+  children: ReactNode;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-const Button: FC<Props> = ({title}) => {
+const Button: FC<Props> = ({ children, ...props }) => {
   return (
-    <button className=''>
-        {title}
+    <button className={classes.button} {...props}>
+      {children}
     </button>
-  )
-}
+  );
+};
 
-export default Button
+export { Button };
