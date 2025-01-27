@@ -2,11 +2,11 @@
     background-color: var(--primary);
     border: none;
     color: #fff;
-    width: 340px;
-    height: 76px;
-    border-radius: 10px;
+    width: 80%;
+    height: 70px;
+    margin: 30px 10%;
+    border-radius: 6px;
     font-size: 30px;
-    margin-top: 30px;
     cursor: pointer;
 }
 
@@ -20,9 +20,17 @@
 
 @media (max-width: 1000px) {
     .button {
-        width: 170px;
-        height: 50px;
-        font-size: 20px;
-        margin-top: 15px;
+        margin: 20px 10%;
+        height: 60px;
+        font-size: 28px;
+    }
+}
+
+
+@media (max-width: 600px) {
+    .button {
+        margin: 10px 10%;
+        height: 40px;
+        font-size: 26px;
     }
 }
