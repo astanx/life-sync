@@ -1,5 +1,4 @@
 import { Logo } from "@/shared/ui/logo";
-import classes from "./Login.module.css";
 import { Input } from "@/shared/ui/input";
 
 const Login = () => {
