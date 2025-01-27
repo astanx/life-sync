@@ -1,7 +1,8 @@
-import { Home } from "@/pages/home";
+import { AppRoutes } from "./routes";
+
 
 const App = () => {
-  return <Home />;
+  return <AppRoutes />;
 };
 
 export default App;
