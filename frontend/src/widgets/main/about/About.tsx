@@ -1,4 +1,4 @@
-import classes from './About.module.css'
+import classes from "./About.module.css";
 import { StartButton } from "@/features/home/start_button";
 
 const About = () => {
