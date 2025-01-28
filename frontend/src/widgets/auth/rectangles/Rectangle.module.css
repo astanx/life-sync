@@ -1,0 +1,14 @@
+.rectangle {
+    background-color: #3730A3;
+    height: 100vh;
+    width: 750px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.login_image {
+    position: absolute;
+    top: -350px;
+}
