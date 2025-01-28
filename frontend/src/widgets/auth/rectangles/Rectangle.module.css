@@ -8,7 +8,14 @@
     position: relative;
     overflow: hidden;
 }
+
 .login_image {
     position: absolute;
     top: -350px;
+}
+
+@media (max-width: 1000px) {
+    .rectangle {
+        display: none;
+    }
 }

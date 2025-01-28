@@ -12,6 +12,11 @@
     margin: 0;
 }
 
+.register {
+    color: var(--primary) !important;
+    cursor: pointer;
+}
+
 .login span,
 p {
     color: #4B5563;
@@ -24,12 +29,10 @@ p {
 
 
 .logo_container {
-    padding: 100px;
+    padding: 70px;
 }
 
 @media (max-width: 1000px) {
-
-
     .login h3 {
         font-size: 26px;
     }
