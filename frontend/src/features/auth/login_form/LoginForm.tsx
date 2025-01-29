@@ -19,12 +19,12 @@ const LoginForm = () => {
       const apiError = error as AxiosError<Response>;
 
       if (apiError.response && apiError.response.data) {
-        setError("username", {
+        setError("email", {
           type: "manual",
           message: apiError.response.data.error || "Login failed",
         });
       } else {
-        setError("username", {
+        setError("email", {
           type: "manual",
           message: "An unexpected error occurred",
         });
@@ -36,10 +36,11 @@ const LoginForm = () => {
       <Input
         label="Email"
         placeholder="Email"
-        {...register("username", { required: true })}
+        type="email"
+        {...register("email", { required: true })}
       />
-      {errors.username && (
-        <span className={classes.error}>{errors.username.message}</span>
+      {errors.email && (
+        <span className={classes.error}>{errors.email.message}</span>
       )}
       <Input
         label="Password"

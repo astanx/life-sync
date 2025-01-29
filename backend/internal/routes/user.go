@@ -35,7 +35,7 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
 		claims["userid"] = user.ID
-		claims["username"] = user.Username
+		claims["email"] = user.Email
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 		tokenString, err := token.SignedString(mySigningKey)
@@ -61,7 +61,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.Where("username = ?", user.Username).First(&foundUser).Error; err != nil {
+		if err := db.Where("email = ?", user.Email).First(&foundUser).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 			return
 		}
@@ -74,7 +74,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
 		claims["userid"] = foundUser.ID
-		claims["username"] = foundUser.Username
+		claims["email"] = foundUser.Email
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 		tokenString, err := token.SignedString(mySigningKey)
@@ -103,12 +103,12 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.Model(&user).Where("id = ?", user.ID).Select("username").Updates(updatedUser).Error; err != nil {
+		if err := db.Model(&user).Where("id = ?", user.ID).Select("email").Updates(updatedUser).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"username": updatedUser.Username})
+		c.JSON(http.StatusOK, gin.H{"email": updatedUser.Email})
 	}
 }
 

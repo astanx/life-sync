@@ -1,6 +1,6 @@
 interface User {
   password: string;
-  username: string;
+  email: string;
   repeat_password?: string;
 }
 type Response = {
