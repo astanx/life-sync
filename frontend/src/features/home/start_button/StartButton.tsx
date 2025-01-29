@@ -4,7 +4,7 @@ import classes from "./StartButton.module.css";
 const StartButton = () => {
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate("/login");
+    navigate("/register");
   };
   return (
     <button className={classes.button} onClick={handleClick}>
