@@ -1,4 +1,7 @@
-
 .form div {
     margin: 20px 0;
+}
+
+.error {
+    color: red !important;
 }
