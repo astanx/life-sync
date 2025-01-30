@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"lifeSync/internal/models"
 	"net/http"
 	"time"
@@ -43,10 +44,10 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-
+		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "user registered successfully",
-			"token":   tokenString,
+			"id":      user.ID,
 		})
 	}
 }
@@ -78,19 +79,40 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 		tokenString, err := token.SignedString(mySigningKey)
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
 
-		c.JSON(http.StatusOK, gin.H{"token": tokenString, "id": foundUser.ID})
+		c.JSON(http.StatusOK, gin.H{"id": foundUser.ID})
 	}
 }
 
 func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
-		userID := c.Param("id")
+		tokenString, err := c.Cookie("token")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		claims := &jwt.MapClaims{}
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return mySigningKey, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
+
+		userID := (*claims)["userid"].(float64)
 
 		if err := db.First(&user, userID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -115,7 +137,27 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
-		userID := c.Param("id")
+
+		tokenString, err := c.Cookie("token")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		claims := &jwt.MapClaims{}
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return mySigningKey, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
+
+		userID := (*claims)["userid"].(float64)
 
 		if err := db.First(&user, userID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
