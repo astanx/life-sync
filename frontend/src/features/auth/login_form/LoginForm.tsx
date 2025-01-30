@@ -2,8 +2,8 @@ import { Input } from "@/shared/ui/input";
 import { AuthButton } from "@/features/auth/auth_button";
 import classes from "./LoginForm.module.css";
 import { useForm } from "react-hook-form";
-import { authAPI, Response, User } from "@/features/auth/api";
-import { AxiosError } from "axios";
+import { User } from "@/features/auth/api";
+import { useAuthStore } from "@/features/auth/model";
 
 const LoginForm = () => {
   const {
@@ -12,23 +12,15 @@ const LoginForm = () => {
     setError,
     formState: { errors },
   } = useForm<User>();
+  const login = useAuthStore((state) => state.login);
   const submit = async (user: User) => {
-    try {
-      await authAPI.login(user);
-    } catch (error) {
-      const apiError = error as AxiosError<Response>;
+    const data = await login(user);
 
-      if (apiError.response && apiError.response.data) {
-        setError("email", {
-          type: "manual",
-          message: apiError.response.data.error || "Login failed",
-        });
-      } else {
-        setError("email", {
-          type: "manual",
-          message: "An unexpected error occurred",
-        });
-      }
+    if (data.error) {
+      setError("email", {
+        type: "manual",
+        message: data.error || "Login failed",
+      });
     }
   };
   return (

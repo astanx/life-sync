@@ -5,7 +5,7 @@ interface User {
 }
 type Response = {
   error?: string;
-  token: string;
+  id: number;
 };
 
 export type { User, Response };
