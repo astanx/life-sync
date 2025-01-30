@@ -94,24 +94,28 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 		var user models.User
 		tokenString, err := c.Cookie("token")
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
 			return
 		}
 
-		claims := &jwt.MapClaims{}
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return mySigningKey, nil
+			return []byte(mySigningKey), nil
 		})
-
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
 		}
 
-		userID, ok := (*claims)["userid"].(float64)
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID in token"})
 			return
@@ -136,35 +140,37 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"email": updatedUser.Email})
 	}
 }
-
 func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
 
 		tokenString, err := c.Cookie("token")
-
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
 			return
 		}
 
-		claims := &jwt.MapClaims{}
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return mySigningKey, nil
+			return []byte(mySigningKey), nil
 		})
-
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
 		}
 
-		userID, ok := (*claims)["userid"].(float64)
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
 
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID in token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims", "claims": claims})
 			return
 		}
 
@@ -174,7 +180,7 @@ func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		if err := db.Delete(&user).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 			return
 		}
 
