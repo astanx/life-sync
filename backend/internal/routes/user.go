@@ -83,7 +83,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"token": tokenString})
+		c.JSON(http.StatusOK, gin.H{"token": tokenString, "id": foundUser.ID})
 	}
 }
 
