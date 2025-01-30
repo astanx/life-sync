@@ -2,8 +2,8 @@ import { Input } from "@/shared/ui/input";
 import { AuthButton } from "../auth_button";
 import classes from "./RegisterForm.module.css";
 import { useForm } from "react-hook-form";
-import { AxiosError } from "axios";
-import { authAPI, Response, User } from "@/features/auth/api";
+import { User } from "@/features/auth/api";
+import { useAuthStore } from "@/features/auth/model";
 
 const RegisterForm = () => {
   const {
@@ -12,6 +12,9 @@ const RegisterForm = () => {
     setError,
     formState: { errors },
   } = useForm<User>();
+
+  const registerUser = useAuthStore((state) => state.register);
+  
   const submit = async (user: User) => {
     if (user.password.trim() !== user.repeat_password?.trim()) {
       setError("repeat_password", {
@@ -20,24 +23,16 @@ const RegisterForm = () => {
       });
       return;
     }
-    try {
-      await authAPI.register(user);
-    } catch (error) {
-      const apiError = error as AxiosError<Response>;
+    const data = await registerUser(user);
 
-      if (apiError.response && apiError.response.data) {
-        setError("email", {
-          type: "manual",
-          message: apiError.response.data.error || "Register failed",
-        });
-      } else {
-        setError("email", {
-          type: "manual",
-          message: "An unexpected error occurred",
-        });
-      }
+    if (data.error) {
+      setError("email", {
+        type: "manual",
+        message: data.error || "Register failed",
+      });
     }
   };
+
   return (
     <form className={classes.form} onSubmit={handleSubmit(submit)}>
       <Input

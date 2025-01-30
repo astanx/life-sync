@@ -6,13 +6,14 @@ interface Store {
   email: string;
   id: number;
   login: (user: User) => Promise<Response>;
+  register: (user: User) => Promise<Response>;
 }
 const useAuthStore = create<Store>()(
   persist(
     (set) => ({
       email: "",
       id: 0,
-      login: async (user: User): Promise<Response> => {
+      login: async (user: User) => {
         try {
           const response = await authAPI.login(user);
 
@@ -28,6 +29,22 @@ const useAuthStore = create<Store>()(
           return { error: errorMessage, id: 0 };
         }
       },
+      register: async (user: User) => {
+        try {
+          const response = await authAPI.register(user);
+
+          if (response.data.error) {
+            return { error: response.data.error, id: 0 };
+          }
+          set(() => ({ id: response.data.id, email: user.email }));
+
+          return { id: response.data.id };
+        } catch (e) {
+          const errorMessage =
+            e instanceof Error ? e.message : "An unknown error occurred";
+          return { error: errorMessage, id: 0 };
+        }
+      }
     }),
     {
       name: "auth-storage",
