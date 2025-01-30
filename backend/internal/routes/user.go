@@ -85,7 +85,6 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
-
 		c.JSON(http.StatusOK, gin.H{"id": foundUser.ID})
 	}
 }
@@ -112,7 +111,11 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		userID := (*claims)["userid"].(float64)
+		userID, ok := (*claims)["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID in token"})
+			return
+		}
 
 		if err := db.First(&user, userID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -139,6 +142,7 @@ func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 		var user models.User
 
 		tokenString, err := c.Cookie("token")
+
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
@@ -157,7 +161,12 @@ func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		userID := (*claims)["userid"].(float64)
+		userID, ok := (*claims)["userid"].(float64)
+
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID in token"})
+			return
+		}
 
 		if err := db.First(&user, userID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
