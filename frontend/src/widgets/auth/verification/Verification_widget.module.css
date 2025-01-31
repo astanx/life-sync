@@ -1,0 +1,52 @@
+.logo_container {
+    padding: 70px 70px 100px 70px;
+}
+
+.verification {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 2rem;
+}
+
+.verification h3 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.verification span,
+p {
+    color: #4B5563;
+    font-size: 16px;
+}
+
+.verification span {
+    text-align: center;
+}
+
+.code {
+    color: var(--primary) !important;
+    cursor: pointer;
+}
+@media (max-width: 1000px) {
+    .verification h3 {
+        font-size: 26px;
+    }
+
+    .verification span,
+    p {
+        color: #4B5563;
+        font-size: 12px;
+    }
+
+    .verification span {
+        text-align: center;
+    }
+
+    .verification {
+        margin: 0;
+        padding: 5px;
+    }
+}

@@ -4,6 +4,7 @@ import classes from "./RegisterForm.module.css";
 import { useForm } from "react-hook-form";
 import { User } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/model";
+import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
   const {
@@ -14,6 +15,7 @@ const RegisterForm = () => {
   } = useForm<User>();
 
   const registerUser = useAuthStore((state) => state.register);
+  const navigate = useNavigate()
   
   const submit = async (user: User) => {
     if (user.password.trim() !== user.repeat_password?.trim()) {
@@ -30,7 +32,10 @@ const RegisterForm = () => {
         type: "manual",
         message: data.error || "Register failed",
       });
+      return
     }
+    
+    navigate("/verification")
   };
 
   return (

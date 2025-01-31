@@ -1,4 +1,4 @@
-import { Rectangle } from "./Rectangle";
+import { Rectangle } from "@/widgets/auth/rectangles";
 import login_image from "@/shared/assets/images/login_image.png";
 import classes from "./Rectangle.module.css";
 

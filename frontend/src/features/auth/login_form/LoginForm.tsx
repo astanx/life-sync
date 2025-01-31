@@ -4,6 +4,7 @@ import classes from "./LoginForm.module.css";
 import { useForm } from "react-hook-form";
 import { User } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/model";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const {
@@ -12,7 +13,10 @@ const LoginForm = () => {
     setError,
     formState: { errors },
   } = useForm<User>();
+
   const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate()
+
   const submit = async (user: User) => {
     const data = await login(user);
 
@@ -21,7 +25,9 @@ const LoginForm = () => {
         type: "manual",
         message: data.error || "Login failed",
       });
+      return
     }
+    navigate("/verification")
   };
   return (
     <form className={classes.form} onSubmit={handleSubmit(submit)}>

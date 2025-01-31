@@ -1,4 +1,4 @@
-import { Rectangle } from "./Rectangle";
+import { Rectangle } from "@/widgets/auth/rectangles";
 import register_image from "@/shared/assets/images/register_image.png";
 
 const RegisterRectangle = () => {

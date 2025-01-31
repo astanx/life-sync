@@ -1,0 +1,61 @@
+import { InputCell } from "@/shared/ui/input_cell";
+import classes from "./VerificationForm.module.css";
+import { Controller, useForm } from "react-hook-form";
+import { useRef } from "react";
+import { AuthButton } from "@/features/auth/auth_button";
+
+interface Form {
+  authCode: string[];
+}
+
+const VerificationForm = () => {
+  const { handleSubmit, control } = useForm<Form>({
+    defaultValues: { authCode: Array(5).fill("") }, 
+  });
+
+  const submit = async (data: Form) => {
+    console.log(data);
+  };
+
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  
+
+  const handleInputChange = (value: string, index: number) => {
+    if (value.length > 0 && index < inputsRef.current.length - 1) {
+      inputsRef.current[index + 1]?.focus(); 
+    } else if (value.length === 0 && index > 0) {
+      inputsRef.current[index - 1]?.focus();
+    }
+  };
+
+
+  return (
+    <form className={classes.form} onSubmit={handleSubmit(submit)}>
+      <div>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Controller
+            key={index}
+            name={`authCode.${index}`}
+            control={control}
+            defaultValue=""
+            rules={{ required: true }}
+            render={({ field }) => (
+              <InputCell
+                {...field}
+                index={index}
+                ref={(el) => (inputsRef.current[index] = el)}
+                onCustomChange={(value: string) => {
+                  field.onChange(value);
+                  handleInputChange(value, index);
+                }}
+              />
+            )}
+          />
+        ))}
+      </div>
+      <AuthButton>Verify</AuthButton>
+    </form>
+  );
+};
+
+export { VerificationForm };
