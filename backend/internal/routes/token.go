@@ -78,7 +78,7 @@ func ValidateToken(db *gorm.DB) gin.HandlerFunc {
 
 func getUserClaimsFromCookie(c *gin.Context) (jwt.MapClaims, error) {
 	tokenString, err := c.Cookie("token")
-	fmt.Print(err)
+
 	if err != nil {
 		return nil, fmt.Errorf("no token provided")
 	}

@@ -11,7 +11,8 @@ import (
 )
 
 func SendVerificationCode(c *gin.Context) {
-
+	fmt.Print(c.Cookie("token"))
+	fmt.Print(121321)
 	claims, err := getUserClaimsFromCookie(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
