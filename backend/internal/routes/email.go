@@ -40,7 +40,7 @@ func SendVerificationCode(c *gin.Context) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "verification_code",
 		Value:    verificationCode,
-		Path:     "/",
+		Path:     "/api",
 		HttpOnly: true,
 		Secure:   true,
 		MaxAge:   300,

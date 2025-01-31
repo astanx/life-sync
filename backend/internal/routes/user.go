@@ -43,7 +43,7 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
+		c.SetCookie("token", tokenString, 3600, "/api", "lifesync-backend.onrender.com", true, true)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "user registered successfully",
 			"id":      user.ID,
@@ -83,7 +83,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
+		c.SetCookie("token", tokenString, 3600, "/api", "lifesync-backend.onrender.com", true, true)
 		c.JSON(http.StatusOK, gin.H{"id": foundUser.ID})
 	}
 }
