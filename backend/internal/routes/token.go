@@ -75,3 +75,27 @@ func ValidateToken(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Hello, %s!", claims["username"])})
 	}
 }
+
+func getUserClaimsFromCookie(c *gin.Context) (jwt.MapClaims, error) {
+	tokenString, err := c.Cookie("token")
+	if err != nil {
+		return nil, fmt.Errorf("no token provided")
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(mySigningKey), nil
+	})
+	if err != nil || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("invalid token claims")
+	}
+
+	return claims, nil
+}
