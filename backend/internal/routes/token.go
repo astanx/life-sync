@@ -100,3 +100,12 @@ func getUserClaimsFromCookie(c *gin.Context) (jwt.MapClaims, error) {
 
 	return claims, nil
 }
+
+func createTokenFromClaims(claims map[string]interface{}) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(claims))
+	tokenString, err := token.SignedString([]byte(mySigningKey))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}

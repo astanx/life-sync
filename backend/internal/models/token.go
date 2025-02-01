@@ -10,3 +10,7 @@ type Token struct {
 	Userid uint   `gorm:"not null"`
 	User   User   `gorm:"foreignKey:Userid"`
 }
+
+type Code struct {
+	Code string `json:"code"`
+}

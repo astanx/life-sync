@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"lifeSync/internal/config"
+	"lifeSync/internal/models"
 	"net/http"
 	"net/smtp"
 
@@ -11,8 +12,6 @@ import (
 )
 
 func SendVerificationCode(c *gin.Context) {
-	fmt.Print(c.Cookie("token"))
-	fmt.Print(121321)
 	claims, err := getUserClaimsFromCookie(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -24,9 +23,7 @@ func SendVerificationCode(c *gin.Context) {
 	email := config.GetEnv("email")
 	password := config.GetEnv("email_password")
 
-	from := email
 	to, ok := claims["email"].(string)
-
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "email not found in token claims", "claims": claims})
 		return
@@ -38,15 +35,17 @@ func SendVerificationCode(c *gin.Context) {
 		return
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "verification_code",
-		Value:    verificationCode,
-		Path:     "/api",
-		HttpOnly: true,
-		Secure:   true,
-		MaxAge:   300,
-	})
+	claims["code"] = verificationCode
 
+	tokenString, err := createTokenFromClaims(claims)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
+		return
+	}
+
+	c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
+
+	from := email
 	subject := "Verification Code for Your LifeSync Account"
 	body := fmt.Sprintf(
 		"Hello!\n\nUse the following code to verify your account:\n\nVerification Code: %s\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nLifeSync Team.",
@@ -78,15 +77,25 @@ func generateVerificationCode() (string, error) {
 }
 
 func ValidateCode(c *gin.Context) {
-	cookie, err := c.Cookie("verification_code")
+	var code models.Code
+	claims, err := getUserClaimsFromCookie(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "No verification code found"})
 		return
 	}
 
-	userInput := c.PostForm("code")
+	verificationCode, ok := claims["code"].(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No verification code found in token"})
+		return
+	}
 
-	if userInput == cookie {
+	if err := c.ShouldBindJSON(&code); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if code.Code == verificationCode {
 		c.JSON(http.StatusOK, gin.H{"message": "Code validated successfully"})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid verification code"})
