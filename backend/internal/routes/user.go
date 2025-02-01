@@ -44,7 +44,18 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
+		cookie := http.Cookie{
+			Name:     "token",
+			Value:    tokenString,
+			Path:     "/",
+			Domain:   "lifesync-backend.onrender.com",
+			MaxAge:   3600,
+			HttpOnly: false,
+			Secure:   false,
+			SameSite: http.SameSiteNoneMode,
+		}
+
+		http.SetCookie(c.Writer, &cookie)
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "user registered successfully",
@@ -86,7 +97,18 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
+		cookie := http.Cookie{
+			Name:     "token",
+			Value:    tokenString,
+			Path:     "/",
+			Domain:   "lifesync-backend.onrender.com",
+			MaxAge:   3600,
+			HttpOnly: false,
+			Secure:   false,
+			SameSite: http.SameSiteNoneMode,
+		}
+
+		http.SetCookie(c.Writer, &cookie)
 
 		c.JSON(http.StatusOK, gin.H{"id": foundUser.ID})
 	}

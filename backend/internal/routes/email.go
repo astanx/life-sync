@@ -43,7 +43,18 @@ func SendVerificationCode(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
+	cookie := http.Cookie{
+		Name:     "token",
+		Value:    tokenString,
+		Path:     "/",
+		Domain:   "lifesync-backend.onrender.com",
+		MaxAge:   3600,
+		HttpOnly: false,
+		Secure:   false,
+		SameSite: http.SameSiteNoneMode,
+	}
+
+	http.SetCookie(c.Writer, &cookie)
 
 	from := email
 	subject := "Verification Code for Your LifeSync Account"
