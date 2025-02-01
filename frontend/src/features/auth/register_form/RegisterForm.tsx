@@ -15,6 +15,7 @@ const RegisterForm = () => {
   } = useForm<User>();
 
   const registerUser = useAuthStore((state) => state.register);
+  const sendVerificationCode = useAuthStore((state) => state.sendVerificationCode)
   const navigate = useNavigate()
   
   const submit = async (user: User) => {
@@ -34,7 +35,7 @@ const RegisterForm = () => {
       });
       return
     }
-    
+    await sendVerificationCode()
     navigate("/verification")
   };
 

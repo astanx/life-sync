@@ -7,6 +7,7 @@ interface Store {
   id: number;
   login: (user: User) => Promise<Response>;
   register: (user: User) => Promise<Response>;
+  sendVerificationCode: () => Promise<{error?: string} | undefined>
 }
 const useAuthStore = create<Store>()(
   persist(
@@ -44,8 +45,22 @@ const useAuthStore = create<Store>()(
             e instanceof Error ? e.message : "An unknown error occurred";
           return { error: errorMessage, id: 0 };
         }
+      },
+      sendVerificationCode: async () => {
+        try {
+          const response = await authAPI.sendVerificationCode();
+  
+          if (response.data.error) {
+            return { error: response.data.error};
+          }
+        } catch (e) {
+          const errorMessage =
+            e instanceof Error ? e.message : "An unknown error occurred";
+          return { error: errorMessage};
+        }
       }
     }),
+    
     {
       name: "auth-storage",
       storage: createJSONStorage(() => sessionStorage),

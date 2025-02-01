@@ -15,11 +15,16 @@ const LoginForm = () => {
   } = useForm<User>();
 
   const login = useAuthStore((state) => state.login);
+  const sendVerificationCode = useAuthStore((state) => state.sendVerificationCode)
   const navigate = useNavigate()
 
   const submit = async (user: User) => {
     const data = await login(user);
-
+    setTimeout(() => {
+      console.log(document.cookie);
+    }, 5000)
+    
+    
     if (data.error) {
       setError("email", {
         type: "manual",
@@ -27,6 +32,11 @@ const LoginForm = () => {
       });
       return
     }
+    setTimeout(async () => {
+      await sendVerificationCode()
+      
+    }, 5000)
+    
     navigate("/verification")
   };
   return (
