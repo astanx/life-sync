@@ -50,8 +50,8 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			Path:     "/",
 			Domain:   "lifesync-backend.onrender.com",
 			MaxAge:   3600,
-			HttpOnly: false,
-			Secure:   false,
+			HttpOnly: true,
+			Secure:   true,
 			SameSite: http.SameSiteNoneMode,
 		}
 
@@ -103,8 +103,8 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			Path:     "/",
 			Domain:   "lifesync-backend.onrender.com",
 			MaxAge:   3600,
-			HttpOnly: false,
-			Secure:   false,
+			HttpOnly: true,
+			Secure:   true,
 			SameSite: http.SameSiteNoneMode,
 		}
 
