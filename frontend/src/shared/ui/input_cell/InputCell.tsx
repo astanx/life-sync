@@ -23,6 +23,7 @@ const InputCell = forwardRef<HTMLInputElement, InputCellProps>(
         maxLength={1}
         onChange={handleChange}
         {...props} 
+        autoComplete="off"
       />
     );
   }

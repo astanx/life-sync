@@ -8,4 +8,8 @@ type Response = {
   id: number;
 };
 
-export type { User, Response };
+type VerifyCodeResponse = 
+    | { error: string }
+    | { message: string };
+
+export type { User, Response, VerifyCodeResponse };

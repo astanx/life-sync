@@ -13,6 +13,10 @@ const authAPI = {
   sendVerificationCode: async () => {
     const response = await intence.get("/verification")
     return response
+  },
+  verifyCode: async (code: string) => {
+    const response = await intence.post("/verification", {code})
+    return response
   }
 };
 

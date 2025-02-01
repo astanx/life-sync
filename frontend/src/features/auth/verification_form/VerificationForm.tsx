@@ -1,8 +1,10 @@
 import { InputCell } from "@/shared/ui/input_cell";
 import classes from "./VerificationForm.module.css";
 import { Controller, useForm } from "react-hook-form";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { AuthButton } from "@/features/auth/auth_button";
+import { useAuthStore } from "../model";
+import { useNavigate } from "react-router-dom";
 
 interface Form {
   authCode: string[];
@@ -12,9 +14,20 @@ const VerificationForm = () => {
   const { handleSubmit, control } = useForm<Form>({
     defaultValues: { authCode: Array(5).fill("") }, 
   });
+  const [verifyCodeError, setVerifyCodeError] = useState("")
+
+  const verifyCode = useAuthStore((state) => state.verifyCode)
+  const navigate = useNavigate()
 
   const submit = async (data: Form) => {
-    console.log(data);
+    const response = await verifyCode(data.authCode)
+
+    if ('error' in response){
+      setVerifyCodeError(response.error)
+      return
+    }
+    setVerifyCodeError("")
+    navigate("/projects")
   };
 
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
@@ -52,6 +65,9 @@ const VerificationForm = () => {
             )}
           />
         ))}
+        {verifyCodeError && (
+        <div className={classes.error}>{verifyCodeError}</div>
+      )}
       </div>
       <AuthButton>Verify</AuthButton>
     </form>
