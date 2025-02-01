@@ -44,7 +44,7 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.SetCookie("token", tokenString, 3600, "/api", "lifesync-backend.onrender.com", false, true)
+		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
 
 		if _, err := c.Cookie("token"); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set cookie"})
@@ -90,7 +90,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.SetCookie("token", tokenString, 3600, "/api", "lifesync-backend.onrender.com", false, true)
+		c.SetCookie("token", tokenString, 3600, "/", "lifesync-backend.onrender.com", true, true)
 
 		if _, err := c.Cookie("token"); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set cookie"})
