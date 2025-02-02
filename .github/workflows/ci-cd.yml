@@ -62,16 +62,3 @@ jobs:
           file: backend/build/Dockerfile
           push: true
           tags: fox2893/lifesync-backend:latest
-
-      - name: Deploy to Kubernetes
-        run: |
-          echo "Deploying to Kubernetes..."
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > kubeconfig.yaml
-          export KUBECONFIG=kubeconfig.yaml
-
-          kubectl apply -f backend/build/k8s/deployment.yaml
-          kubectl apply -f backend/build/k8s/configmap.yaml
-          kubectl apply -f backend/build/k8s/service.yaml
-
-          kubectl get pods -o wide
-          kubectl get svc
