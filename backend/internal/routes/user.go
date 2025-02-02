@@ -90,8 +90,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 		claims["email"] = foundUser.Email
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-		tokenString, err := token.SignedString(mySigningKey)
-
+		tokenString, err := token.SignedString([]byte("your-secret-key")) // Replace with your actual secret key
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
