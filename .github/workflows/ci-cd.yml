@@ -20,6 +20,14 @@ jobs:
         with:
           go-version: '1.23'  
 
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: backend/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Build backend
         run: |
           cd backend
