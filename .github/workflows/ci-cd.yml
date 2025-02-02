@@ -20,11 +20,11 @@ jobs:
         with:
           go-version: '1.23'  
 
-      - name: Build
-        run: go build -o lifesync cmd/app/main.go 
+      - name: Build backend
+        run: go build -o lifesync backend/cmd/app/main.go 
 
       - name: Run tests
-        run: go test -v .\tests
+        run: go test -v backend/tests
 
       - name: Lint
         uses: golangci/golangci-lint-action@v3
@@ -48,12 +48,12 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build backend and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: your-dockerhub-username/myapp:latest
+          tags: fox2893/lifesync-backend:latest
 
       - name: Deploy to Kubernetes
         run: |
@@ -61,9 +61,9 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
 
-          kubectl apply -f build/k8s/deployment.yaml
-          kubectl apply -f build/k8s/configmap.yaml
-          kubectl apply -f build/k8s/service.yaml
+          kubectl apply -f backend/build/k8s/deployment.yaml
+          kubectl apply -f backend/build/k8s/configmap.yaml
+          kubectl apply -f backend/build/k8s/service.yaml
 
           kubectl get pods -o wide
           kubectl get svc

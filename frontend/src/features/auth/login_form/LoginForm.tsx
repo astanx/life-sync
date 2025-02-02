@@ -20,10 +20,6 @@ const LoginForm = () => {
 
   const submit = async (user: User) => {
     const data = await login(user);
-    setTimeout(() => {
-      console.log(document.cookie);
-    }, 5000)
-    
     
     if (data.error) {
       setError("email", {

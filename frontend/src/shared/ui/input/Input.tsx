@@ -13,7 +13,13 @@ const Input: FC<Props> = forwardRef<HTMLInputElement, Props>((props, ref) => {
       <label htmlFor={`#${props.label}`} className={classes.label}>
         {props.label}
       </label>
-      <input autoComplete="off" id={props.label} className={classes.input} ref={ref} {...props} />
+      <input
+        autoComplete="off"
+        id={props.label}
+        className={classes.input}
+        ref={ref}
+        {...props}
+      />
     </div>
   ) : (
     <input autoComplete="off" className={classes.input} ref={ref} {...props} />
