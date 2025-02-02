@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main  
+    paths:
+      - 'backend/**'
   pull_request:
     branches:
       - main  
+    paths:
+      - 'backend/**'
 
 jobs:
   build:
@@ -21,10 +25,14 @@ jobs:
           go-version: '1.23'  
 
       - name: Build backend
-        run: go build -o lifesync backend/cmd/app/main.go 
+        run: |
+          cd backend
+          go build -o lifesync cmd/app/main.go 
 
       - name: Run tests
-        run: go test -v backend/tests
+        run: |
+          cd backend
+          go test -v tests
 
       - name: Lint
         uses: golangci/golangci-lint-action@v3
@@ -51,7 +59,7 @@ jobs:
       - name: Build backend and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: backend
           push: true
           tags: fox2893/lifesync-backend:latest
 
