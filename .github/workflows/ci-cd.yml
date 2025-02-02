@@ -23,7 +23,7 @@ jobs:
       - name: Cache Go modules
         uses: actions/cache@v3
         with:
-          path: backend/pkg/mod
+          path: backend/pkg/go.mod
           key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
