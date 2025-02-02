@@ -77,6 +77,7 @@ func SendVerificationCode(c *gin.Context) {
 
 func generateVerificationCode() (string, error) {
 	b := make([]byte, 2)
+
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
