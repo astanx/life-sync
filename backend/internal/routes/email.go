@@ -48,12 +48,12 @@ func SendVerificationCode(c *gin.Context) {
 		Name:     "token",
 		Value:    tokenString,
 		Path:     "/",
-		Domain:   ".onrender.com",
+		Domain:   "lifesync-backend.onrender.com",
 		MaxAge:   3600,
 		HttpOnly: true,
-		// Secure:   true,
-		// SameSite: http.SameSiteNoneMode,
-		Expires: time.Now().Add(1 * time.Hour),
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		Expires:  time.Now().Add(1 * time.Hour),
 	}
 
 	http.SetCookie(c.Writer, &cookie)
