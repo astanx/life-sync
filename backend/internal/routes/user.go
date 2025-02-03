@@ -51,9 +51,9 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			Domain:   ".onrender.com",
 			MaxAge:   3600,
 			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
-			Expires:  time.Now().Add(1 * time.Hour),
+			// Secure:   true,
+			// SameSite: http.SameSiteNoneMode,
+			Expires: time.Now().Add(1 * time.Hour),
 		}
 
 		http.SetCookie(c.Writer, &cookie)
@@ -104,9 +104,9 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			Domain:   ".onrender.com",
 			MaxAge:   3600,
 			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
-			Expires:  time.Now().Add(1 * time.Hour),
+			// Secure:   true,
+			// SameSite: http.SameSiteNoneMode,
+			Expires: time.Now().Add(1 * time.Hour),
 		}
 
 		http.SetCookie(c.Writer, &cookie)
