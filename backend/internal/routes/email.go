@@ -48,7 +48,7 @@ func SendVerificationCode(c *gin.Context) {
 		Name:     "token",
 		Value:    tokenString,
 		Path:     "/",
-		Domain:   "lifesync-backend.onrender.com",
+		Domain:   ".onrender.com",
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   true,
