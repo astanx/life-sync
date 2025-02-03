@@ -53,6 +53,7 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 			HttpOnly: true,
 			Secure:   true,
 			SameSite: http.SameSiteNoneMode,
+			Expires:  time.Now().Add(1 * time.Hour),
 		}
 
 		http.SetCookie(c.Writer, &cookie)
@@ -90,7 +91,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 		claims["email"] = foundUser.Email
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-		tokenString, err := token.SignedString([]byte("your-secret-key")) // Replace with your actual secret key
+		tokenString, err := token.SignedString([]byte(mySigningKey))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -105,6 +106,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 			HttpOnly: true,
 			Secure:   true,
 			SameSite: http.SameSiteNoneMode,
+			Expires:  time.Now().Add(1 * time.Hour),
 		}
 
 		http.SetCookie(c.Writer, &cookie)

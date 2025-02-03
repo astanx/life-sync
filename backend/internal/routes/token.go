@@ -89,6 +89,7 @@ func getUserClaimsFromCookie(c *gin.Context) (jwt.MapClaims, error) {
 		}
 		return []byte(mySigningKey), nil
 	})
+
 	if err != nil || !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}

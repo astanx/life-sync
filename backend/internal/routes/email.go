@@ -7,6 +7,7 @@ import (
 	"lifeSync/internal/models"
 	"net/http"
 	"net/smtp"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -52,6 +53,7 @@ func SendVerificationCode(c *gin.Context) {
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
+		Expires:  time.Now().Add(1 * time.Hour),
 	}
 
 	http.SetCookie(c.Writer, &cookie)
