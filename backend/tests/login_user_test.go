@@ -13,31 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
-
-type User struct {
-	ID       uint   `gorm:"primaryKey"`
-	Email    string `gorm:"unique"`
-	Password string
-}
-
-func setupMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	gormDB, err := gorm.Open(postgres.New(postgres.Config{
-		Conn: db,
-	}), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a gorm database", err)
-	}
-
-	return gormDB, mock
-}
 
 func TestLoginUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -67,9 +43,9 @@ func TestLoginUser(t *testing.T) {
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
 
-	log.Println("Запрос на вход выполнен")
-	log.Printf("Статус ответа: %d\n", resp.Code)
-	log.Printf("Тело ответа: %s\n", resp.Body.String())
+	log.Println("Request completed")
+	log.Printf("Response status: %d\n", resp.Code)
+	log.Printf("Response body: %s\n", resp.Body.String())
 
 	assert.Equal(t, http.StatusOK, resp.Code)
 
@@ -105,9 +81,9 @@ func TestLoginUserInvalidCredentials(t *testing.T) {
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
 
-	log.Println("Запрос на вход с неверными учетными данными выполнен")
-	log.Printf("Статус ответа: %d\n", resp.Code)
-	log.Printf("Тело ответа: %s\n", resp.Body.String())
+	log.Println("Request completed")
+	log.Printf("Response status: %d\n", resp.Code)
+	log.Printf("Response body: %s\n", resp.Body.String())
 
 	assert.Equal(t, http.StatusUnauthorized, resp.Code)
 
