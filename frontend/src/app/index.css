@@ -2,10 +2,11 @@
     --primary: #4F46E5;
     --primary-dark: #3730A3;
     --primary-darkest: #312E81;
+    --purple: #8833FF;
 }
 
 body {
     font-family: 'Inter', sans-serif;
     margin: 0;
-    background-color: #F7F8FA;
+    background-color: #EDEFF2;
 }
