@@ -5,15 +5,17 @@ import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 
 interface AccordionItem {
   title: string;
-  content: string;
+  content?: string;
   icon?: IconDefinition;
+
 }
 
 interface Props {
   items: AccordionItem[];
+  light?: boolean;
 }
 
-const Accordion: React.FC<Props> = ({ items }) => {
+const Accordion: React.FC<Props> = ({ items, light }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const handleClick = (index: number) => {
@@ -21,7 +23,7 @@ const Accordion: React.FC<Props> = ({ items }) => {
   };
 
   return (
-    <div className={classes.accordion}>
+    <div className={`${classes.accordion} ${light ? "" : classes.dark }`}>
       {items.map((item, index) => (
         <div
           key={index}
@@ -33,7 +35,7 @@ const Accordion: React.FC<Props> = ({ items }) => {
             className={classes.accordion_header}
             onClick={() => handleClick(index)}
           >
-            {item.icon && <FontAwesomeIcon icon={item.icon} />}
+            {item.icon && <FontAwesomeIcon icon={item.icon} className={classes.icon}/>}
 
             <span>{item.title}</span>
             <span
@@ -42,7 +44,7 @@ const Accordion: React.FC<Props> = ({ items }) => {
               }`}
             ></span>
           </div>
-          {activeIndex === index && (
+          {activeIndex === index && light && (
             <div className={classes.accordion_content}>
               <p>{item.content}</p>
             </div>
