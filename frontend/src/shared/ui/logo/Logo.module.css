@@ -2,7 +2,9 @@
     width: 470px;
     height: 100px;
 }
-
+.small {
+    transform: scale(0.5);
+}
 
 @media (max-width: 1000px) {
     .logo {
