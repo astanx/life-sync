@@ -1,11 +1,12 @@
+import React, { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useState } from "react";
-import classes from './Calendar.module.css'
+import { EventInput } from "@fullcalendar/core";
+import classes from "./Calendar.module.css";
 
-const Calendar = () => {
-  const [events, setEvents] = useState([
+const Calendar: React.FC = () => {
+  const [events, setEvents] = useState<EventInput[]>([
     {
       id: "1",
       title: "Develop Chat Application",
@@ -43,22 +44,57 @@ const Calendar = () => {
     },
   ]);
 
+  const handleDateSelect = (selectInfo: any) => {
+    const title = prompt("Please enter a new title for your event");
+    const calendarApi = selectInfo.view.calendar;
+
+    calendarApi.unselect(); // clear date selection
+
+    if (title) {
+      const newEvent: EventInput = {
+        id: String(events.length + 1),
+        title,
+        start: selectInfo.startStr,
+        end: selectInfo.endStr,
+        color: "#" + Math.floor(Math.random() * 16777215).toString(16), // Random color
+      };
+
+      setEvents([...events, newEvent]);
+    }
+  };
+
+  const handleEventDrop = (dropInfo: any) => {
+    const updatedEvents = events.map((event) => {
+      if (event.id === dropInfo.event.id) {
+        return {
+          ...event,
+          start: dropInfo.event.startStr,
+          end: dropInfo.event.endStr,
+        };
+      }
+      return event;
+    });
+
+    setEvents(updatedEvents);
+  };
+
   return (
     <div className={classes.calendar_container}>
       <h1>Calendar name</h1>
       <div className={classes.calendar}>
         <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            events={events}
-            editable={true}
-            selectable={true}
-            height="auto"
-            eventClassNames={() => classes.custom_event} // кастомные классы для событий
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={events}
+          editable={true}
+          selectable={true}
+          height="auto"
+          eventClassNames={() => classes.custom_event}
           dayCellClassNames={() => classes.custom_day_cell}
+          select={handleDateSelect}
+          eventDrop={handleEventDrop}
         />
       </div>
-      
     </div>
   );
 };
