@@ -129,7 +129,7 @@ func LoginFromCookie(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		email, ok := claims["email"].(float64)
+		email, ok := claims["email"].(string)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email in token"})
 			return
