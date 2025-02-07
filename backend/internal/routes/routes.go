@@ -9,16 +9,23 @@ import (
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	apiRoutes := r.Group("/api")
+	userRoutes := apiRoutes.Group("/user")
 	{
-		apiRoutes.POST("/user", RegisterUser(db))
-		apiRoutes.POST("/user/login", LoginUser(db))
-		apiRoutes.GET("/user/login", LoginFromCookie(db))
-		apiRoutes.PUT("/user", UpdateUser(db))
-		apiRoutes.DELETE("/user", DeleteUser(db))
-		apiRoutes.GET("/user/verification", SendVerificationCode)
-		apiRoutes.POST("/user/verification", ValidateCode)
-		apiRoutes.GET("/createJWT", CreateToken(db))
-		apiRoutes.GET("/validateJWT", ValidateToken(db))
+		userRoutes.POST("", RegisterUser(db))
+		userRoutes.POST("/login", LoginUser(db))
+		userRoutes.GET("login", LoginFromCookie(db))
+		userRoutes.PUT("", UpdateUser(db))
+		userRoutes.DELETE("", DeleteUser(db))
+		userRoutes.GET("/verification", SendVerificationCode)
+		userRoutes.POST("/verification", ValidateCode)
+	}
+
+	calendarRoutes := apiRoutes.Group("/calendar")
+
+	{
+		calendarRoutes.GET("", GetCalendarEvents(db))
+		calendarRoutes.POST("", CreateCalendarEvent(db))
+		calendarRoutes.PUT("", UpdateCalendarEvent(db))
 	}
 
 	r.GET("/", func(c *gin.Context) {
