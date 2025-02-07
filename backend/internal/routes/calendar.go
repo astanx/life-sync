@@ -125,7 +125,6 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 		updatedEvent.Start = payload.Start
 		updatedEvent.End = payload.End
 		updatedEvent.Color = payload.Color
-		updatedEvent.Userid = uint(userID)
 
 		db.Save(&updatedEvent)
 
@@ -143,18 +142,29 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 
 		userID, ok := claims["userid"].(float64)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims", "claims": claims})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims"})
 			return
 		}
 
-		var events []models.Event
-		result := db.Where("userid = ?", uint(userID)).Find(&events)
+		var events []struct {
+			ID    uint   `json:"id"`
+			Title string `json:"title"`
+			Start string `json:"start"`
+			End   string `json:"end"`
+			Color string `json:"color"`
+		}
+
+		result := db.Model(&models.Event{}).
+			Select("id, title, start, end, color").
+			Where("userid = ?", uint(userID)).
+			Find(&events)
+
 		if result.Error != nil {
 			log.Printf("Error fetching events: %v", result.Error)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch events"})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"data": events})
+		c.JSON(http.StatusOK, gin.H{"events": events})
 	}
 }
