@@ -8,8 +8,12 @@ type Response = {
   id: number;
 };
 
-type VerifyCodeResponse = 
-    | { error: string }
-    | { message: string };
+type CookieLogin = {
+  id: number;
+  email: string;
+  error?: string;
+};
 
-export type { User, Response, VerifyCodeResponse };
+type VerifyCodeResponse = { error: string } | { message: string };
+
+export type { User, Response, VerifyCodeResponse, CookieLogin };

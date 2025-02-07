@@ -1,16 +1,21 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { authAPI, Response, User, VerifyCodeResponse } from "@/features/auth/api";
+import {
+  authAPI,
+  Response,
+  User,
+  VerifyCodeResponse,
+} from "@/features/auth/api";
 
 interface Store {
   email: string;
   id: number;
   login: (user: User) => Promise<Response>;
+  loginFromCookie: () => void;
   register: (user: User) => Promise<Response>;
-  sendVerificationCode: () => Promise<VerifyCodeResponse>
-  verifyCode: (code: string[]) => Promise<VerifyCodeResponse>
+  sendVerificationCode: () => Promise<VerifyCodeResponse>;
+  verifyCode: (code: string[]) => Promise<VerifyCodeResponse>;
 }
-
 
 const useAuthStore = create<Store>()(
   persist(
@@ -33,6 +38,13 @@ const useAuthStore = create<Store>()(
           return { error: errorMessage, id: 0 };
         }
       },
+      loginFromCookie: async () => {
+        const response = await authAPI.loginFromCookie();
+        if (response.data.error) {
+          return;
+        }
+        set(() => ({ id: response.data.id, email: response.data.email }));
+      },
       register: async (user: User) => {
         try {
           const response = await authAPI.register(user);
@@ -52,32 +64,32 @@ const useAuthStore = create<Store>()(
       sendVerificationCode: async () => {
         try {
           const response = await authAPI.sendVerificationCode();
-  
+
           if (response.data.error) {
-            return { error: response.data.error};
+            return { error: response.data.error };
           }
-          return {message: "Verify send success"}
+          return { message: "Verify send success" };
         } catch (e) {
           const errorMessage =
             e instanceof Error ? e.message : "An unknown error occurred";
-          return { error: errorMessage};
+          return { error: errorMessage };
         }
       },
       verifyCode: async (code: string[]) => {
         try {
           const response = await authAPI.verifyCode(code.join(""));
           if (response.data.error) {
-            return { error: response.data.error};
+            return { error: response.data.error };
           }
-          return {message: "Verify success"}
+          return { message: "Verify success" };
         } catch (e) {
           const errorMessage =
             e instanceof Error ? e.message : "An unknown error occurred";
-          return { error: errorMessage};
+          return { error: errorMessage };
         }
-      }
+      },
     }),
-    
+
     {
       name: "auth-storage",
       storage: createJSONStorage(() => sessionStorage),

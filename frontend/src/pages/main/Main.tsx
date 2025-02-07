@@ -13,7 +13,6 @@ const Main = () => {
           <PagesAccordion />
           <ProjectsAccordion />
         </div>
-
         <Calendar />
       </div>
     </div>

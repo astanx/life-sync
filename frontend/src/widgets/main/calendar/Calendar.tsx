@@ -48,15 +48,14 @@ const Calendar: React.FC = () => {
     const title = prompt("Please enter a new title for your event");
     const calendarApi = selectInfo.view.calendar;
 
-    calendarApi.unselect(); // clear date selection
-
+    calendarApi.unselect();
     if (title) {
       const newEvent: EventInput = {
         id: String(events.length + 1),
         title,
         start: selectInfo.startStr,
         end: selectInfo.endStr,
-        color: "#" + Math.floor(Math.random() * 16777215).toString(16), // Random color
+        color: "#" + Math.floor(Math.random() * 16777215).toString(16), 
       };
 
       setEvents([...events, newEvent]);
