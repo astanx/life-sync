@@ -10,6 +10,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type EventResponse struct {
+	ID    uint      `json:"id"`
+	Title string    `json:"title"`
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+	Color string    `json:"color"`
+}
+
 func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
@@ -46,7 +54,6 @@ func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		userID, ok := claims["userid"].(float64)
-
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims", "claims": claims})
 			return
@@ -66,7 +73,15 @@ func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusCreated, gin.H{"data": newEvent})
+		response := EventResponse{
+			ID:    newEvent.ID,
+			Title: newEvent.Title,
+			Start: newEvent.Start,
+			End:   newEvent.End,
+			Color: newEvent.Color,
+		}
+
+		c.JSON(http.StatusCreated, gin.H{"event": response})
 	}
 }
 
@@ -108,14 +123,13 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		userID, ok := claims["userid"].(float64)
-
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims", "claims": claims})
 			return
 		}
 
 		var updatedEvent models.Event
-		result := db.First(&updatedEvent, "id = ?, userid = ?", eventId, userID)
+		result := db.First(&updatedEvent, "id = ? AND userid = ?", eventId, userID)
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "No event with that ID exists"})
 			return
@@ -128,7 +142,15 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 
 		db.Save(&updatedEvent)
 
-		c.JSON(http.StatusOK, gin.H{"data": updatedEvent})
+		response := EventResponse{
+			ID:    updatedEvent.ID,
+			Title: updatedEvent.Title,
+			Start: updatedEvent.Start,
+			End:   updatedEvent.End,
+			Color: updatedEvent.Color,
+		}
+
+		c.JSON(http.StatusOK, gin.H{"event": response})
 	}
 }
 
@@ -146,7 +168,7 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var events models.Events
+		var events []EventResponse
 
 		result := db.Model(&models.Event{}).
 			Select(`id, title, start, "end", color`).
@@ -159,6 +181,6 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"events": events})
+		c.JSON(http.StatusOK, gin.H{"event": events})
 	}
 }
