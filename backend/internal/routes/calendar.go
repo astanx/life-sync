@@ -146,16 +146,10 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var events []struct {
-			ID    uint   `json:"id"`
-			Title string `json:"title"`
-			Start string `json:"start"`
-			End   string `json:"end"`
-			Color string `json:"color"`
-		}
+		var events models.Events
 
 		result := db.Model(&models.Event{}).
-			Select("id, title, start, end, color").
+			Select(`id, title, start, "end", color`).
 			Where("userid = ?", uint(userID)).
 			Find(&events)
 

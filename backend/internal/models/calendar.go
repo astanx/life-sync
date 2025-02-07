@@ -14,3 +14,11 @@ type Event struct {
 	End    time.Time `gorm:"not null"`
 	Color  string    `gorm:"size:50"`
 }
+
+type Events []struct {
+	ID    uint   `json:"id"`
+	Title string `json:"title"`
+	Start string `json:"start"`
+	End   string `json:"end"`
+	Color string `json:"color"`
+}
