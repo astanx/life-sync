@@ -115,6 +115,30 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+func LoginFromCookie(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claims, err := getUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID in token"})
+			return
+		}
+
+		email, ok := claims["email"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email in token"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"email": email, "id": userID})
+	}
+}
+
 func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
