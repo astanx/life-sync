@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"lifeSync/internal/models"
 	"log"
 	"net/http"
@@ -179,5 +180,48 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"event": events})
+	}
+}
+
+func DeleteCalendarEvent(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		eventID := c.Param("id")
+
+		if eventID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Event ID is required"})
+			return
+		}
+
+		claims, err := getUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims"})
+			return
+		}
+
+		var event models.Event
+		result := db.First(&event, "id = ? AND userid = ?", eventID, uint(userID))
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Event not found or access denied"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+			}
+			return
+		}
+
+		result = db.Delete(&event)
+		if result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully"})
 	}
 }
