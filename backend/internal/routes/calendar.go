@@ -187,7 +187,6 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 func DeleteCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		eventIDStr := c.Param("id")
-		log.Printf("Attempting to delete event with ID: %s", eventIDStr)
 
 		if eventIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Event ID is required"})
