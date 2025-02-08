@@ -15,25 +15,25 @@ const LoginForm = () => {
   } = useForm<User>();
 
   const login = useAuthStore((state) => state.login);
-  const sendVerificationCode = useAuthStore((state) => state.sendVerificationCode)
-  const navigate = useNavigate()
+  const sendVerificationCode = useAuthStore(
+    (state) => state.sendVerificationCode
+  );
+  const navigate = useNavigate();
 
   const submit = async (user: User) => {
     const data = await login(user);
-    
+
     if (data.error) {
       setError("email", {
         type: "manual",
         message: data.error || "Login failed",
       });
-      return
+      return;
     }
-    setTimeout(async () => {
-      await sendVerificationCode()
-      
-    }, 5000)
-    
-    navigate("/verification")
+
+    await sendVerificationCode();
+
+    navigate("/verification");
   };
   return (
     <form className={classes.form} onSubmit={handleSubmit(submit)}>

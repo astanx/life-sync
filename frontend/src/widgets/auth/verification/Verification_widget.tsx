@@ -7,15 +7,16 @@ import { useEffect } from "react";
 
 const VerificationWidget = () => {
   const navigate = useNavigate();
-  const email = useAuthStore((state) => state.email)
-  const handleLoginClick = () => {
-    navigate("/login");
-  };
+  const email = useAuthStore((state) => state.email);
+  const sendVerificationCode = useAuthStore(
+    (state) => state.sendVerificationCode
+  );
+
   useEffect(() => {
-    if (!email){
-      navigate("/login")
+    if (!email) {
+      navigate("/login");
     }
-  })
+  });
   return (
     <div>
       <div className={classes.logo_container}>
@@ -27,7 +28,7 @@ const VerificationWidget = () => {
         <VerificationForm />
         <span>
           No code yet?{" "}
-          <span className={classes.code} onClick={handleLoginClick}>
+          <span className={classes.code} onClick={sendVerificationCode}>
             Send another
           </span>
         </span>
