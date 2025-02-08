@@ -5,6 +5,7 @@ import (
 	"lifeSync/internal/models"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -185,29 +186,39 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 
 func DeleteCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		eventIDStr := c.Param("id")
+		log.Printf("Attempting to delete event with ID: %s", eventIDStr)
 
-		eventID := c.Param("id")
-
-		if eventID == "" {
+		if eventIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Event ID is required"})
+			return
+		}
+
+		eventID, err := strconv.ParseUint(eventIDStr, 10, 64)
+		if err != nil {
+			log.Printf("Error converting eventID to uint: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID format"})
 			return
 		}
 
 		claims, err := getUserClaimsFromCookie(c)
 		if err != nil {
+			log.Printf("Error getting user claims: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
 		userID, ok := claims["userid"].(float64)
 		if !ok {
+			log.Printf("Invalid userID in claims: %v", claims)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims"})
 			return
 		}
 
 		var event models.Event
-		result := db.First(&event, "id = ? AND userid = ?", eventID, uint(userID))
+		result := db.First(&event, "id = ? AND userid = ?", uint(eventID), uint(userID))
 		if result.Error != nil {
+			log.Printf("Error finding event: %v", result.Error)
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Event not found or access denied"})
 			} else {
@@ -218,6 +229,7 @@ func DeleteCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 
 		result = db.Delete(&event)
 		if result.Error != nil {
+			log.Printf("Error deleting event: %v", result.Error)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 			return
 		}
