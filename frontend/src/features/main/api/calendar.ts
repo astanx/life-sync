@@ -15,7 +15,7 @@ const calendarAPI = {
     const response = await intence.put<EventResponse>("", event);
     return response;
   },
-  deleteEvent: async (eventId: number) => {
+  deleteEvent: async (eventId: string) => {
     const response = await intence.delete<EventResponse>(`/${eventId}`);
     return response;
   },

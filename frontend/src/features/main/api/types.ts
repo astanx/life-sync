@@ -5,6 +5,7 @@ interface EventResponse {
   error?: string;
 }
 
+
 interface GetEventResponse {
   event: EventInput[];
   error?: string;
@@ -17,4 +18,13 @@ interface Event {
   end?: DateInput;
 }
 
-export type { EventResponse, GetEventResponse, Event };
+interface EventState {
+  title: string;
+  id: number;
+  start: Date;
+  end: Date;
+  color: string;
+}
+
+
+export type { EventResponse, GetEventResponse, Event, EventState };

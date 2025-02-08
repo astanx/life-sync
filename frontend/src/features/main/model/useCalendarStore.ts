@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { calendarAPI } from "../api";
+import { calendarAPI } from "@/features/main/api";
 import { EventInput } from "@fullcalendar/core/index.js";
 
 interface Store {
@@ -8,7 +8,7 @@ interface Store {
   getEvents: () => void;
   createEvent: (event: EventInput) => void;
   updateEvent: (event: EventInput) => void;
-  deleteEvent: (event: EventInput) => void;
+  deleteEvent: (eventId: string) => void;
 }
 
 const useCalendarStore = create<Store>()(
@@ -50,16 +50,22 @@ const useCalendarStore = create<Store>()(
           ),
         }));
       },
-      deleteEvent: async(event: EventInput) => {
-        const response = await calendarAPI.deleteEvent(event);
+      deleteEvent: async (eventId: string) => {
+        const response = await calendarAPI.deleteEvent(eventId);
 
         if (response.data.error) {
           return { error: response.data.error };
         }
-        set((state) => ({
-          events: state.events.filter(e => e.id !== event.id)
-        }))
-      }
+
+        set((state) => {
+          const filteredEvents = state.events.filter((e) => {
+            const idMatch = (e.id as unknown as number) !== +eventId;
+            return idMatch;
+          });
+
+          return { events: filteredEvents };
+        });
+      },
     }),
 
     {
