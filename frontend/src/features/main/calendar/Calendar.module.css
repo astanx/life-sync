@@ -1,0 +1,41 @@
+:global(.fc-header-toolbar) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 10px 10px 0 0;
+}
+
+:global(.fc-event-time) {
+    display: none;
+}
+
+:global(.fc-toolbar-title) {
+    font-size: 20px !important;
+    font-weight: bold !important;
+}
+
+:global(.fc-toolbar-chunk) {
+    display: flex;
+    gap: 8px;
+}
+
+:global(.fc-button) {
+    background: var(--lightes) !important;
+    color: var(--primary-darkest) !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 5px 10px !important;
+    font-weight: bold !important;
+    transition: background 0.3s, color 0.3s;
+}
+
+:global(.fc-button:hover) {
+    background: var(--primary-dark) !important;
+    color: white !important;
+}
+
+:global(.fc-button-active) {
+    background: var(--primary-dark) !important;
+    color: white !important;
+}

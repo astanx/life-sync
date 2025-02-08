@@ -1,1 +1,1 @@
-export { Calendar } from "./Calendar.tsx";
+export { CalendarWidget } from "./Calendar.tsx";
