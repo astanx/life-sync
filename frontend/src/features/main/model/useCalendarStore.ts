@@ -8,6 +8,7 @@ interface Store {
   getEvents: () => void;
   createEvent: (event: EventInput) => void;
   updateEvent: (event: EventInput) => void;
+  deleteEvent: (event: EventInput) => void;
 }
 
 const useCalendarStore = create<Store>()(
@@ -49,6 +50,16 @@ const useCalendarStore = create<Store>()(
           ),
         }));
       },
+      deleteEvent: async(event: EventInput) => {
+        const response = await calendarAPI.deleteEvent(event);
+
+        if (response.data.error) {
+          return { error: response.data.error };
+        }
+        set((state) => ({
+          events: state.events.filter(e => e.id !== event.id)
+        }))
+      }
     }),
 
     {

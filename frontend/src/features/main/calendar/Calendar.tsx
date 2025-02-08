@@ -12,6 +12,7 @@ const Calendar = () => {
   const getEvents = useCalendarStore((state) => state.getEvents);
   const createEvent = useCalendarStore((state) => state.createEvent);
   const updateEvent = useCalendarStore((state) => state.updateEvent);
+  const deleteEvent = useCalendarStore((state) => state.deleteEvent)
 
   useEffect(() => {
     getEvents();
@@ -43,6 +44,11 @@ const Calendar = () => {
 
     updateEvent(updatedEvent);
   };
+  const handleEventClick = (clickInfo: any) => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      deleteEvent(clickInfo.event.id);
+    }
+  };
 
   return (
     <FullCalendar
@@ -56,6 +62,7 @@ const Calendar = () => {
       dayCellClassNames={() => classes.custom_day_cell}
       select={handleDateSelect}
       eventDrop={handleEventDrop}
+      eventClick={handleEventClick}
     />
   );
 };
