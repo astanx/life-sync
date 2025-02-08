@@ -93,7 +93,6 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 			Title   string    `json:"title"`
 			Start   time.Time `json:"start"`
 			End     time.Time `json:"end"`
-			Color   string    `json:"color"`
 		}
 
 		if err := c.ShouldBindJSON(&payload); err != nil {
@@ -138,7 +137,6 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 		updatedEvent.Title = payload.Title
 		updatedEvent.Start = payload.Start
 		updatedEvent.End = payload.End
-		updatedEvent.Color = payload.Color
 
 		db.Save(&updatedEvent)
 
@@ -147,7 +145,6 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 			Title: updatedEvent.Title,
 			Start: updatedEvent.Start,
 			End:   updatedEvent.End,
-			Color: updatedEvent.Color,
 		}
 
 		c.JSON(http.StatusOK, gin.H{"event": response})
