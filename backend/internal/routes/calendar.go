@@ -87,13 +87,13 @@ func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		eventId := c.Param("eventId")
 
 		var payload struct {
-			Title string    `json:"title"`
-			Start time.Time `json:"start"`
-			End   time.Time `json:"end"`
-			Color string    `json:"color"`
+			EventID uint      `json:"id"`
+			Title   string    `json:"title"`
+			Start   time.Time `json:"start"`
+			End     time.Time `json:"end"`
+			Color   string    `json:"color"`
 		}
 
 		if err := c.ShouldBindJSON(&payload); err != nil {
@@ -129,7 +129,7 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var updatedEvent models.Event
-		result := db.First(&updatedEvent, "id = ? AND userid = ?", eventId, userID)
+		result := db.First(&updatedEvent, "id = ? AND userid = ?", payload.EventID, userID)
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "No event with that ID exists"})
 			return
