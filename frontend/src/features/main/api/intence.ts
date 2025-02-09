@@ -1,8 +1,13 @@
 import axios from "axios";
 
-const intence = axios.create({
+const eventIntence = axios.create({
+  baseURL: "https://lifesync-backend.onrender.com/api/calendar/events",
+  withCredentials: true,
+});
+
+const calendarIntence = axios.create({
   baseURL: "https://lifesync-backend.onrender.com/api/calendar",
   withCredentials: true,
 });
 
-export { intence };
+export { eventIntence, calendarIntence };

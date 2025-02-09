@@ -5,7 +5,7 @@ import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 
 interface AccordionItem {
   title: string;
-  content?: string;
+  content?: string | JSX.Element;
   icon?: IconDefinition;
 
 }

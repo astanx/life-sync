@@ -6,13 +6,16 @@ import {
   faMessage,
 } from "@fortawesome/free-solid-svg-icons";
 import classes from './PagesAccordion.module.css'
+import { AddButton } from "@/shared/ui/add_button";
+import { AddCalendarButton } from "@/features/main/add_calendar_button";
+
 
 const PagesAccordion = () => {
   const accordionItems = [
-    { title: "My projects", content: "My projects content", icon: faHome },
+    { title: "My projects", content: <AddButton title="Add new project"/>, icon: faHome },
     { title: "Chats", content: "Chats content", icon: faMessage },
-    { title: "Tasks", content: "Tasks content", icon: faClipboardList },
-    { title: "Calendar", content: "Calendar content", icon: faCalendar },
+    { title: "Tasks", content: <AddButton title="Add new task"/>, icon: faClipboardList },
+    { title: "Calendar", content: <AddCalendarButton />, icon: faCalendar },
   ];
   return (
     <div className={classes.accordion_container}>

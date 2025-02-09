@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { calendarAPI } from "@/features/main/api";
+import { calendarAPI, eventsAPI } from "@/features/main/api";
 import { EventInput } from "@fullcalendar/core/index.js";
 
 interface Store {
@@ -9,6 +9,7 @@ interface Store {
   createEvent: (event: EventInput) => void;
   updateEvent: (event: EventInput) => void;
   deleteEvent: (eventId: string) => void;
+  createCalendar: (title: string) => void;
 }
 
 const useCalendarStore = create<Store>()(
@@ -16,7 +17,7 @@ const useCalendarStore = create<Store>()(
     (set) => ({
       events: [],
       getEvents: async () => {
-        const response = await calendarAPI.getEvents();
+        const response = await eventsAPI.getEvents();
 
         if (response.data.error) {
           return { error: response.data.error };
@@ -24,7 +25,7 @@ const useCalendarStore = create<Store>()(
         set(() => ({ events: response.data.event }));
       },
       createEvent: async (event: EventInput) => {
-        const response = await calendarAPI.createEvent(event);
+        const response = await eventsAPI.createEvent(event);
 
         if (response.data.error) {
           return { error: response.data.error };
@@ -39,7 +40,7 @@ const useCalendarStore = create<Store>()(
           end: event.end,
         };
 
-        const response = await calendarAPI.updateEvent(cleanEvent);
+        const response = await eventsAPI.updateEvent(cleanEvent);
 
         if (response.data.error) {
           return { error: response.data.error };
@@ -51,7 +52,7 @@ const useCalendarStore = create<Store>()(
         }));
       },
       deleteEvent: async (eventId: string) => {
-        const response = await calendarAPI.deleteEvent(eventId);
+        const response = await eventsAPI.deleteEvent(eventId);
 
         if (response.data.error) {
           return { error: response.data.error };
@@ -66,6 +67,12 @@ const useCalendarStore = create<Store>()(
           return { events: filteredEvents };
         });
       },
+      createCalendar: async(title: string) => {
+        const response = await calendarAPI.createCalendar(title)
+        console.log(response);
+        
+        return response
+      }
     }),
 
     {
