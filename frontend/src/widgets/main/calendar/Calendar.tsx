@@ -1,4 +1,4 @@
-import { Calendar } from "@/features/main/calendar";
+import { Calendar } from "@/features/main/calendar/ui";
 import classes from "./Calendar.module.css";
 import { AddCalendarButton } from "@/features/main/add_calendar_button";
 

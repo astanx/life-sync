@@ -21,8 +21,8 @@ interface Event {
 interface EventState {
   title: string;
   id: number;
-  start: Date;
-  end: Date;
+  start: DateInput;
+  end: DateInput;
   color: string;
 }
 

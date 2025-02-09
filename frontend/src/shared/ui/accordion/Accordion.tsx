@@ -46,7 +46,7 @@ const Accordion: React.FC<Props> = ({ items, light }) => {
           </div>
           {activeIndex === index && light && (
             <div className={classes.accordion_content}>
-              <p>{item.content}</p>
+              <div>{item.content}</div>
             </div>
           )}
         </div>

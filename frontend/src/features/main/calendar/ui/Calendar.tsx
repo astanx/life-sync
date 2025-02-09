@@ -4,15 +4,15 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { EventInput } from "@fullcalendar/core";
 import classes from "./Calendar.module.css";
-import { useCalendarStore } from "@/features/main/model";
+import { useEventStore } from "@/features/main/calendar/model";
 import { generateHexColor } from "@/shared/utils";
 
 const Calendar = () => {
-  const events = useCalendarStore((state) => state.events);
-  const getEvents = useCalendarStore((state) => state.getEvents);
-  const createEvent = useCalendarStore((state) => state.createEvent);
-  const updateEvent = useCalendarStore((state) => state.updateEvent);
-  const deleteEvent = useCalendarStore((state) => state.deleteEvent)
+  const events = useEventStore((state) => state.events);
+  const getEvents = useEventStore((state) => state.getEvents);
+  const createEvent = useEventStore((state) => state.createEvent);
+  const updateEvent = useEventStore((state) => state.updateEvent);
+  const deleteEvent = useEventStore((state) => state.deleteEvent)
 
   useEffect(() => {
     getEvents();
