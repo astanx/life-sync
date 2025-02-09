@@ -22,7 +22,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
 	calendarRoutes := apiRoutes.Group("/calendar")
 	{
+		calendarRoutes.GET("", GetCalendars(db))
 		calendarRoutes.POST("", CreateCalendar(db))
+		calendarRoutes.PUT("", UpdateCalendar(db))
+		calendarRoutes.DELETE("", DeleteCalendar(db))
 	}
 
 	calendarEventRoutes := calendarRoutes.Group("/events")
