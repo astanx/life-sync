@@ -22,3 +22,9 @@ type Events []struct {
 	End   string `json:"end"`
 	Color string `json:"color"`
 }
+
+type Calendar struct {
+	gorm.Model
+	Userid uint   `gorm:"not null"`
+	Title  string `gorm:"size:255;not null"`
+}
