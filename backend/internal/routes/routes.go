@@ -13,7 +13,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	{
 		userRoutes.POST("", RegisterUser(db))
 		userRoutes.POST("/login", LoginUser(db))
-		userRoutes.GET("login", LoginFromCookie(db))
+		userRoutes.GET("/login", LoginFromCookie(db))
 		userRoutes.PUT("", UpdateUser(db))
 		userRoutes.DELETE("", DeleteUser(db))
 		userRoutes.GET("/verification", SendVerificationCode)
