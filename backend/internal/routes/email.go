@@ -140,15 +140,19 @@ func ValidateCode(db *gorm.DB) gin.HandlerFunc {
 				return
 			}
 
-			http.SetCookie(c.Writer, &http.Cookie{
+			cookie := http.Cookie{
 				Name:     "token",
 				Value:    tokenString,
 				Path:     "/",
 				Domain:   "lifesync-backend.onrender.com",
+				MaxAge:   3600,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
-			})
+				SameSite: http.SameSiteNoneMode,
+				Expires:  time.Now().Add(1 * time.Hour),
+			}
+
+			http.SetCookie(c.Writer, &cookie)
 
 			c.JSON(http.StatusOK, gin.H{"message": "Code validated successfully"})
 		} else {
