@@ -17,7 +17,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		userRoutes.PUT("", UpdateUser(db))
 		userRoutes.DELETE("", DeleteUser(db))
 		userRoutes.GET("/verification", SendVerificationCode)
-		userRoutes.POST("/verification", ValidateCode)
+		userRoutes.POST("/verification", ValidateCode(db))
 	}
 
 	calendarRoutes := apiRoutes.Group("/calendar")
