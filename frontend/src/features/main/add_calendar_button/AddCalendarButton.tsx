@@ -1,18 +1,23 @@
 import { AddButton } from "@/shared/ui/add_button";
-import { useCalendarStore } from "@/features/main/calendar_content/model";
-
+import { useState } from "react";
+import { CalendarModal } from "../calendar_modal";
 
 const AddCalendarButton = () => {
-  const createCalendar = useCalendarStore((state) => state.createCalendar);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const handleClick = () => {
-    const title = prompt("Please enter a new title for your calendar");
-  
-    if (title) {
-      createCalendar(title);
-    }
+    setIsOpenModal(true);
   };
-  return <AddButton title="Add new calendar" onClick={handleClick} />;
+
+  const onClose = () => {
+    setIsOpenModal(false);
+  };
+  return (
+    <div>
+      <AddButton title="Add new calendar" onClick={handleClick} />
+      <CalendarModal isOpen={isOpenModal} onClose={onClose} />
+    </div>
+  );
 };
 
 export { AddCalendarButton };
