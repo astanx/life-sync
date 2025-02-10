@@ -144,6 +144,7 @@ func ValidateCode(db *gorm.DB) gin.HandlerFunc {
 				Name:     "token",
 				Value:    tokenString,
 				Path:     "/",
+				Domain:   "lifesync-backend.onrender.com",
 				HttpOnly: true,
 				Secure:   true,
 				SameSite: http.SameSiteStrictMode,
