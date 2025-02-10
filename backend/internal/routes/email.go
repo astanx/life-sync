@@ -125,7 +125,7 @@ func ValidateCode(db *gorm.DB) gin.HandlerFunc {
 				return
 			}
 
-			claims["user_id"] = user.ID
+			claims["userid"] = user.ID
 			claims["exp"] = time.Now().Add(72 * time.Hour).Unix()
 
 			token := jwt.New(jwt.SigningMethodHS256)
