@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 func SendVerificationCode(c *gin.Context) {
@@ -90,28 +92,71 @@ func generateVerificationCode() (string, error) {
 	return fmt.Sprintf("%d", code), nil
 }
 
-func ValidateCode(c *gin.Context) {
-	var code models.Code
-	claims, err := getUserClaimsFromCookie(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "No verification code found"})
-		return
-	}
+func ValidateCode(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var code models.Code
+		claims, err := getUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No verification code found"})
+			return
+		}
 
-	verificationCode, ok := claims["code"].(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "No verification code found in token"})
-		return
-	}
+		email, ok := claims["email"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No email found in token"})
+			return
+		}
 
-	if err := c.ShouldBindJSON(&code); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+		verificationCode, ok := claims["code"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No verification code found in token"})
+			return
+		}
 
-	if code.Code == verificationCode {
-		c.JSON(http.StatusOK, gin.H{"message": "Code validated successfully"})
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid verification code"})
+		if err := c.ShouldBindJSON(&code); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if code.Code == verificationCode {
+			var user models.User
+			if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+				return
+			}
+
+			claims["userid"] = user.ID
+			claims["exp"] = time.Now().Add(72 * time.Hour).Unix()
+
+			token := jwt.New(jwt.SigningMethodHS256)
+			tokenClaims := token.Claims.(jwt.MapClaims)
+			for key, value := range claims {
+				tokenClaims[key] = value
+			}
+
+			tokenString, err := token.SignedString(mySigningKey)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+				return
+			}
+
+			cookie := http.Cookie{
+				Name:     "token",
+				Value:    tokenString,
+				Path:     "/",
+				Domain:   "lifesync-backend.onrender.com",
+				MaxAge:   3600,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteNoneMode,
+				Expires:  time.Now().Add(1 * time.Hour),
+			}
+
+			http.SetCookie(c.Writer, &cookie)
+
+			c.JSON(http.StatusOK, gin.H{"message": "Code validated successfully"})
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid verification code"})
+		}
 	}
 }

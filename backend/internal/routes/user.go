@@ -34,8 +34,11 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
+<<<<<<< HEAD
 		claims["userid"] = user.ID
 		claims["verified"] = false
+=======
+>>>>>>> cedbd87391c6fd06a37d47c66be32e640c2825a4
 		claims["email"] = user.Email
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
@@ -88,7 +91,6 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
-		claims["userid"] = foundUser.ID
 		claims["email"] = foundUser.Email
 		claims["verified"] = false
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()

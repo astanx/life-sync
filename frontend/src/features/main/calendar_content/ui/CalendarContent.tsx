@@ -9,12 +9,12 @@ const CalendarContent = () => {
   
   useEffect(() => {
     getCalendars();
-  }, []);
+  }, [getCalendars]);
 
   return (
     <div>
       {calendars.slice(-5).map((calendar) => (
-        <p key={calendar.id}>{calendar.title}</p>
+        <p key={calendar.id} className={classes.calendar}>{calendar.title}</p>
       ))}
       <AddCalendarButton />
     </div>
