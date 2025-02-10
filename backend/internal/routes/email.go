@@ -7,10 +7,10 @@ import (
 	"lifeSync/internal/models"
 	"net/http"
 	"net/smtp"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 )
 
@@ -125,9 +125,24 @@ func ValidateCode(db *gorm.DB) gin.HandlerFunc {
 				return
 			}
 
+			claims["user_id"] = user.ID
+			claims["exp"] = time.Now().Add(72 * time.Hour).Unix()
+
+			token := jwt.New(jwt.SigningMethodHS256)
+			tokenClaims := token.Claims.(jwt.MapClaims)
+			for key, value := range claims {
+				tokenClaims[key] = value
+			}
+
+			tokenString, err := token.SignedString(mySigningKey)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+				return
+			}
+
 			http.SetCookie(c.Writer, &http.Cookie{
-				Name:     "userid",
-				Value:    strconv.Itoa(int(user.ID)),
+				Name:     "token",
+				Value:    tokenString,
 				Path:     "/",
 				HttpOnly: true,
 				Secure:   true,
