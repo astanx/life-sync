@@ -1,0 +1,6 @@
+.calendar {
+    cursor: pointer;
+    color: var(--light-blue);
+    font-size: 14px;
+    font-weight: 700;
+}
