@@ -8,11 +8,12 @@ import (
 
 type Event struct {
 	gorm.Model
-	Userid uint      `gorm:"not null"`
-	Title  string    `gorm:"size:255;not null"`
-	Start  time.Time `gorm:"not null"`
-	End    time.Time `gorm:"not null"`
-	Color  string    `gorm:"size:50"`
+	Title      string    `gorm:"not null"`
+	Start      time.Time `gorm:"not null"`
+	End        time.Time `gorm:"not null"`
+	Color      string    `gorm:"not null"`
+	Userid     uint      `gorm:"not null"`
+	CalendarID uint      `gorm:"not null"`
 }
 
 type Events []struct {
@@ -25,6 +26,7 @@ type Events []struct {
 
 type Calendar struct {
 	gorm.Model
-	Userid uint   `gorm:"not null"`
-	Title  string `gorm:"size:255;not null"`
+	Title  string  `gorm:"not null"`
+	Userid uint    `gorm:"not null"`
+	Events []Event `gorm:"foreignKey:CalendarID"`
 }
