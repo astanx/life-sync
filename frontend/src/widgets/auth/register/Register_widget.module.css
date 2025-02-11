@@ -1,5 +1,7 @@
 .logo_container {
     padding: 70px 70px 20px 70px;
+    display: flex;
+    justify-content: center;
 }
 
 .register {
@@ -18,18 +20,16 @@
 
 .register span,
 p {
+    text-align: center;
     color: #4B5563;
     font-size: 16px;
-}
-
-.register span {
-    text-align: center;
 }
 
 .login {
     color: var(--primary) !important;
     cursor: pointer;
 }
+
 @media (max-width: 1000px) {
     .register h3 {
         font-size: 26px;
@@ -37,12 +37,7 @@ p {
 
     .register span,
     p {
-        color: #4B5563;
         font-size: 12px;
-    }
-
-    .register span {
-        text-align: center;
     }
 
     .register {

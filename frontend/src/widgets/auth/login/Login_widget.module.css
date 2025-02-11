@@ -19,19 +19,17 @@
 
 .login span,
 p {
+    text-align: center;
     color: #4B5563;
     font-size: 16px;
-}
-
-.login span {
-    text-align: center;
 }
 
 
 .logo_container {
     padding: 70px 70px 20px 70px;
+    display: flex;
+    justify-content: center;
 }
-
 
 @media (max-width: 1000px) {
     .login h3 {
@@ -40,12 +38,7 @@ p {
 
     .login span,
     p {
-        color: #4B5563;
         font-size: 12px;
-    }
-
-    .login span {
-        text-align: center;
     }
 
     .login {

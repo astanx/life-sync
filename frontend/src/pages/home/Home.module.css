@@ -5,8 +5,8 @@
 }
 
 .about_container img {
-    width: 800px;
-    height: 800px;
+    width: 700px;
+    height: 700;
 }
 
 @media (max-width: 1250px) {

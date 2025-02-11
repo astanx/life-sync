@@ -1,5 +1,7 @@
 .logo_container {
     padding: 70px 70px 100px 70px;
+    display: flex;
+    justify-content: center;
 }
 
 .verification {
@@ -16,20 +18,17 @@
     margin: 0;
 }
 
-.verification span,
-p {
-    color: #4B5563;
-    font-size: 16px;
-}
-
 .verification span {
     text-align: center;
+    color: #4B5563;
+    font-size: 16px;
 }
 
 .code {
     color: var(--primary) !important;
     cursor: pointer;
 }
+
 @media (max-width: 1000px) {
     .verification h3 {
         font-size: 26px;
@@ -37,12 +36,7 @@ p {
 
     .verification span,
     p {
-        color: #4B5563;
         font-size: 12px;
-    }
-
-    .verification span {
-        text-align: center;
     }
 
     .verification {

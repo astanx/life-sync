@@ -10,7 +10,7 @@ const Home = () => {
 
   useEffect(() => {
     loginFromCookie()
-  }, [])
+  }, [loginFromCookie])
   return (
     <div>
       <Header />
