@@ -5,33 +5,32 @@ import { EventInput } from "@fullcalendar/core/index.js";
 
 interface Store {
   events: EventInput[];
-  getEvents: () => void;
-  createEvent: (event: EventInput) => void;
-  updateEvent: (event: EventInput) => void;
-  deleteEvent: (eventId: string) => void;
+  getEvents: (calendarId: string) => void;
+  createEvent: (event: EventInput, calendarId: string) => void;
+  updateEvent: (event: EventInput, calendarId: string) => void;
+  deleteEvent: (eventId: string, calendarId: string) => void;
 }
 
 const useEventStore = create<Store>()(
   persist(
     (set) => ({
       events: [],
-      getEvents: async () => {
-        const response = await eventsAPI.getEvents();
-
+      getEvents: async (calendarId: string) => {
+        const response = await eventsAPI.getEvents(calendarId);
         if (response.data.error) {
           return { error: response.data.error };
         }
         set(() => ({ events: response.data.event }));
       },
-      createEvent: async (event: EventInput) => {
-        const response = await eventsAPI.createEvent(event);
+      createEvent: async (event: EventInput, calendarId: string) => {
+        const response = await eventsAPI.createEvent(event, calendarId);
 
         if (response.data.error) {
           return { error: response.data.error };
         }
         set((state) => ({ events: [...state.events, response.data.event] }));
       },
-      updateEvent: async (event: EventInput) => {
+      updateEvent: async (event: EventInput, calendarId: string) => {
         const cleanEvent = {
           id: Number(event._def.publicId),
           title: event._def.title,
@@ -39,7 +38,7 @@ const useEventStore = create<Store>()(
           end: event.end,
         };
 
-        const response = await eventsAPI.updateEvent(cleanEvent);
+        const response = await eventsAPI.updateEvent(cleanEvent, calendarId);
 
         if (response.data.error) {
           return { error: response.data.error };
@@ -50,8 +49,8 @@ const useEventStore = create<Store>()(
           ),
         }));
       },
-      deleteEvent: async (eventId: string) => {
-        const response = await eventsAPI.deleteEvent(eventId);
+      deleteEvent: async (eventId: string, calendarId: string) => {
+        const response = await eventsAPI.deleteEvent(eventId, calendarId);
 
         if (response.data.error) {
           return { error: response.data.error };

@@ -4,6 +4,7 @@ import { FC } from "react";
 import { useForm } from "react-hook-form";
 import classes from "./CalendarDeleteEventModal.module.css";
 import { useEventStore } from "@/features/main/calendar/model";
+import { useParams } from "react-router-dom";
 
 interface Props {
   isOpen: boolean;
@@ -13,10 +14,13 @@ interface Props {
 
 const CalendarDeleteEventModal: FC<Props> = ({ isOpen, onClose, id }) => {
   const { handleSubmit } = useForm<FormData>();
+  const { calendarId } = useParams();
   const deleteEvent = useEventStore((state) => state.deleteEvent);
   const submit = () => {
-    deleteEvent(id);
-    onClose();
+    if (calendarId) {
+      deleteEvent(id, calendarId);
+      onClose();
+    }
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

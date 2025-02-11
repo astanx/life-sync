@@ -11,11 +11,12 @@ interface Store {
   calendars: Calendar[];
   createCalendar: (title: string) => void;
   getCalendars: () => void;
+  getCalendarTitle: (calendarId: string) => string;
 }
 
 const useCalendarStore = create<Store>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       calendars: [],
       createCalendar: async (title: string) => {
         const response = await calendarAPI.createCalendar(title);
@@ -34,6 +35,10 @@ const useCalendarStore = create<Store>()(
           return;
         }
         set(() => ({ calendars: response.data.calendar }));
+      },
+      getCalendarTitle: (calendarId: string) => {
+        return get().calendars.find((calendar) => calendar.id === +calendarId)!
+          .title;
       },
     }),
 

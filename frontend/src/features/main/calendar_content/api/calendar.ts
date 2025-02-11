@@ -5,10 +5,10 @@ const calendarAPI = {
     const response = await calendarIntence.post("", { title });
     return response;
   },
-  getCalendars: async() => {
+  getCalendars: async () => {
     const response = await calendarIntence.get("");
     return response;
-  }
+  },
 };
 
 export { calendarAPI };

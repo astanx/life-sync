@@ -13,6 +13,7 @@ const AppRoutes = () => {
         <Route path="/login" Component={Login} />
         <Route path="/register" Component={Register} />
         <Route path="/verification" Component={Verification} />
+        <Route path="/projects/:calendarId" Component={Main} />
         <Route path="/projects" Component={Main} />
       </Routes>
     </BrowserRouter>

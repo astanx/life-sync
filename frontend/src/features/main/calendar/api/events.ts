@@ -3,22 +3,30 @@ import { eventIntence } from "./intence";
 import { Event, EventResponse, GetEventResponse } from "./types";
 
 const eventsAPI = {
-  createEvent: async (event: EventInput) => {
-    const response = await eventIntence.post<EventResponse>("", event);
+  createEvent: async (event: EventInput, calendarId: string) => {
+    const response = await eventIntence.post<EventResponse>(
+      `/${calendarId}`,
+      event
+    );
     return response;
   },
-  getEvents: async () => {
-    const response = await eventIntence.get<GetEventResponse>("");
+  getEvents: async (calendarId: string) => {
+    const response = await eventIntence.get<GetEventResponse>(`/${calendarId}`);
     return response;
   },
-  updateEvent: async (event: Event) => {
-    const response = await eventIntence.put<EventResponse>("", event);
+  updateEvent: async (event: Event, calendarId: string) => {
+    const response = await eventIntence.put<EventResponse>(
+      `/${calendarId}`,
+      event
+    );
     return response;
   },
-  deleteEvent: async (eventId: string) => {
-    const response = await eventIntence.delete<EventResponse>(`/${eventId}`);
+  deleteEvent: async (eventId: string, calendarId: string) => {
+    const response = await eventIntence.delete<EventResponse>(
+      `/${calendarId}/${eventId}`
+    );
     return response;
-  }
+  },
 };
 
 export { eventsAPI };
