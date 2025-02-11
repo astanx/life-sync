@@ -1,27 +1,42 @@
+import { FC } from "react";
 import { Logo } from "@/shared/ui/logo";
 import {
   faBell,
-  faHome,
   faMessage,
   faUser,
+  faBars,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import classes from "./Header.module.css";
 import { useNavigate } from "react-router-dom";
+import classes from "./Header.module.css";
 
-const Header = () => {
+interface HeaderProps {
+  menuOpen: boolean;
+  toggleMenu: () => void;
+}
+
+const Header: FC<HeaderProps> = ({ menuOpen, toggleMenu }) => {
   const navigate = useNavigate();
-  const handleClick = () => {
+
+  const handleLogoClick = () => {
     navigate("/");
   };
+
   return (
     <header className={classes.header}>
       <div className={classes.logo_container}>
-        <span onClick={handleClick}>
-          <FontAwesomeIcon icon={faHome} />
-        </span>
-        <Logo small />
+        {/* Кнопка меню теперь внутри flex-контейнера */}
+        <button className={classes.menuButton} onClick={toggleMenu}>
+          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
+        </button>
+
+        {/* Логотип теперь кликабельный и выполняет функцию перехода на главную */}
+        <div onClick={handleLogoClick} className={classes.logoWrapper}>
+          <Logo small />
+        </div>
       </div>
+
       <div className={classes.icons_container}>
         <span>
           <FontAwesomeIcon icon={faBell} className={classes.icon} />
