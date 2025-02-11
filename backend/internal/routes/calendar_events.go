@@ -22,11 +22,22 @@ type EventResponse struct {
 func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			Title      string    `json:"title"`
-			Start      time.Time `json:"start"`
-			End        time.Time `json:"end"`
-			Color      string    `json:"color"`
-			CalendarID uint      `json:"calendarid"`
+			Title string    `json:"title"`
+			Start time.Time `json:"start"`
+			End   time.Time `json:"end"`
+			Color string    `json:"color"`
+		}
+
+		calendarIDStr := c.Param("calendarid")
+		if calendarIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Calendar ID is required"})
+			return
+		}
+
+		calendarID, err := strconv.ParseUint(calendarIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid calendar ID format"})
+			return
 		}
 
 		if err := c.ShouldBindJSON(&payload); err != nil {
@@ -62,7 +73,7 @@ func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var calendar models.Calendar
-		result := db.First(&calendar, "id = ? AND userid = ?", payload.CalendarID, uint(userID))
+		result := db.First(&calendar, "id = ? AND userid = ?", uint(calendarID), uint(userID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Calendar not found or access denied"})
 			return
@@ -74,7 +85,7 @@ func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 			End:        payload.End,
 			Color:      payload.Color,
 			Userid:     uint(userID),
-			CalendarID: payload.CalendarID,
+			CalendarID: uint(calendarID),
 		}
 
 		result = db.Create(&newEvent)
@@ -98,11 +109,22 @@ func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			EventID    uint      `json:"id"`
-			Title      string    `json:"title"`
-			Start      time.Time `json:"start"`
-			End        time.Time `json:"end"`
-			CalendarID uint      `json:"calendarid"`
+			EventID uint      `json:"id"`
+			Title   string    `json:"title"`
+			Start   time.Time `json:"start"`
+			End     time.Time `json:"end"`
+		}
+
+		calendarIDStr := c.Param("calendarid")
+		if calendarIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Calendar ID is required"})
+			return
+		}
+
+		calendarID, err := strconv.ParseUint(calendarIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid calendar ID format"})
+			return
 		}
 
 		if err := c.ShouldBindJSON(&payload); err != nil {
@@ -123,14 +145,14 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var calendar models.Calendar
-		result := db.First(&calendar, "id = ? AND userid = ?", payload.CalendarID, uint(userID))
+		result := db.First(&calendar, "id = ? AND userid = ?", uint(calendarID), uint(userID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Calendar not found or access denied"})
 			return
 		}
 
 		var updatedEvent models.Event
-		result = db.First(&updatedEvent, "id = ? AND calendar_id = ?", payload.EventID, payload.CalendarID)
+		result = db.First(&updatedEvent, "id = ? AND calendar_id = ?", payload.EventID, uint(calendarID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "No event with that ID exists in the specified calendar"})
 			return
