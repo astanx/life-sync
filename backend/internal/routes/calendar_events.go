@@ -220,7 +220,7 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"events": events})
+		c.JSON(http.StatusOK, gin.H{"event": events})
 	}
 }
 
