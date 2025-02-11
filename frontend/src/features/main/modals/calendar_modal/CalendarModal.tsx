@@ -3,7 +3,7 @@ import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/modal";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
-import { useCalendarStore } from "../calendar_content/model";
+import { useCalendarStore } from "@/features/main/calendar_content/model";  
 import classes from "./CalendarModal.module.css";
 
 interface Props {

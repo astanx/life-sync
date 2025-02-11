@@ -6,7 +6,8 @@ import { EventInput } from "@fullcalendar/core";
 import classes from "./Calendar.module.css";
 import { useEventStore } from "@/features/main/calendar/model";
 import { generateHexColor } from "@/shared/utils";
-import { CalendarEventModal } from "../../calendar_event_modal copy";
+import { CalendarEventModal } from "@/features/main/modals/calendar_event_modal";
+import { CalendarDeleteEventModal } from "../../modals/calendar_delete_event_modal";
 
 interface Dates {
   start: string;
@@ -14,14 +15,15 @@ interface Dates {
 }
 
 const Calendar = () => {
-  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
+  const [isOpenModalDelete, setIsOpenModalDelete] = useState(false);
   const [selectedDates, setSelectedDates] = useState<Dates | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string>("");
 
   const events = useEventStore((state) => state.events);
   const getEvents = useEventStore((state) => state.getEvents);
   const createEvent = useEventStore((state) => state.createEvent);
   const updateEvent = useEventStore((state) => state.updateEvent);
-  const deleteEvent = useEventStore((state) => state.deleteEvent);
 
   useEffect(() => {
     getEvents();
@@ -32,7 +34,7 @@ const Calendar = () => {
       start: selectInfo.startStr,
       end: selectInfo.endStr,
     });
-    setIsOpenModal(true);
+    setIsOpenModalCreate(true);
 
     const calendarApi = selectInfo.view.calendar;
     calendarApi.unselect();
@@ -49,14 +51,18 @@ const Calendar = () => {
   };
 
   const handleEventClick = (clickInfo: any) => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      deleteEvent(clickInfo.event.id);
-    }
+    setIsOpenModalDelete(true);
+    setSelectedEventId(clickInfo.event.id);
   };
 
-  const onCloseModal = () => {
-    setIsOpenModal(false);
+  const onCloseModalCreate = () => {
+    setIsOpenModalCreate(false);
     setSelectedDates(null);
+  };
+
+  const onCloseModalDelete = () => {
+    setIsOpenModalDelete(false);
+    setSelectedEventId("");
   };
 
   const onSubmitModal = (title: string) => {
@@ -70,7 +76,7 @@ const Calendar = () => {
       };
       createEvent(newEvent);
     }
-    onCloseModal();
+    onCloseModalCreate();
   };
 
   return (
@@ -89,9 +95,15 @@ const Calendar = () => {
         eventClick={handleEventClick}
       />
       <CalendarEventModal
-        isOpen={isOpenModal}
-        onClose={onCloseModal}
+        isOpen={isOpenModalCreate}
+        onClose={onCloseModalCreate}
         onSubmit={onSubmitModal}
+      />
+
+      <CalendarDeleteEventModal
+        isOpen={isOpenModalDelete}
+        id={selectedEventId}
+        onClose={onCloseModalDelete}
       />
     </>
   );

@@ -1,6 +1,6 @@
 import { AddButton } from "@/shared/ui/add_button";
 import { useState } from "react";
-import { CalendarModal } from "../calendar_modal";
+import { CalendarModal } from "@/features/main/modals/calendar_modal";
 
 const AddCalendarButton = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
