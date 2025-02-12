@@ -26,12 +26,10 @@ const Header: FC<HeaderProps> = ({ menuOpen, toggleMenu }) => {
   return (
     <header className={classes.header}>
       <div className={classes.logo_container}>
-        {/* Кнопка меню теперь внутри flex-контейнера */}
         <button className={classes.menuButton} onClick={toggleMenu}>
           <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
         </button>
 
-        {/* Логотип теперь кликабельный и выполняет функцию перехода на главную */}
         <div onClick={handleLogoClick} className={classes.logoWrapper}>
           <Logo small />
         </div>

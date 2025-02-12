@@ -9,7 +9,7 @@
   .logo_container {
     display: flex;
     align-items: center;
-    gap: 20px; /* Добавляем отступ между кнопкой меню и логотипом */
+    gap: 20px;
   }
   
   .menuButton {
@@ -30,7 +30,7 @@
   }
   
   .logoWrapper {
-    cursor: pointer; /* Делаем логотип кликабельным */
+    cursor: pointer;
   }
   
   .icons_container {
@@ -55,11 +55,11 @@
     background-color: rgba(136, 51, 255, 0.1);
     color: var(--primary);
   }
-  
-  /* Скрываем кнопку меню на больших экранах */
-  @media (min-width: 1024px) {
+
+  @media (min-width: 768px) {
     .menuButton {
       opacity: 0;
       pointer-events: none;
+      display: none;
     }
   }

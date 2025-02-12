@@ -11,16 +11,18 @@ const Main = () => {
   return (
     <div>
       <Header menuOpen={menuOpen} toggleMenu={() => setMenuOpen(!menuOpen)} />
-
-      <div className={`${classes.menu} ${menuOpen ? classes.open : ""}`}>
-        <div className={classes.accordion_container}>
-          <PagesAccordion />
-          <ProjectsAccordion />
-        </div>
-      </div>
-
+      
       <div className={classes.container}>
-        <CalendarWidget />
+        <div className={`${classes.menu} ${menuOpen ? classes.open : ""}`}>
+          <div className={classes.accordion_container}>
+            <PagesAccordion />
+            <ProjectsAccordion />
+          </div>
+        </div>
+
+        <div className={classes.content}>
+          <CalendarWidget />
+        </div>
       </div>
     </div>
   );
