@@ -4,6 +4,8 @@ import { Event, EventResponse, GetEventResponse } from "./types";
 
 const eventsAPI = {
   createEvent: async (event: EventInput, calendarId: string) => {
+    console.log(event);
+    
     const response = await eventIntence.post<EventResponse>(
       `/${calendarId}`,
       event

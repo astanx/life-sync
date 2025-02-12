@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { EventInput } from "@fullcalendar/core";
 import classes from "./Calendar.module.css";
 import { useEventStore } from "@/features/main/calendar/model";
 import { generateHexColor } from "@/shared/utils";
@@ -11,7 +10,7 @@ import { useParams } from "react-router-dom";
 import { CalendarEventsTabsModal } from "../../modals/events/calendar_events_tabs_modal";
 import { Event } from "@/features/main/calendar/api";
 
-interface Dates {
+export interface Dates {
   start: string;
   end: string;
 }
@@ -42,6 +41,7 @@ const Calendar = () => {
       start: selectInfo.startStr,
       end: selectInfo.endStr,
     });
+
     setIsOpenModalCreate(true);
 
     const calendarApi = selectInfo.view.calendar;
@@ -82,13 +82,12 @@ const Calendar = () => {
     setSelectedEvent(null);
   };
 
-  const onSubmitModal = (title: string) => {
+  const onSubmitModal = (title: string, dates: Dates) => {
     if (selectedDates && title && calendarId) {
-      const newEvent: EventInput = {
-        id: String(events.length + 1),
+      const newEvent = {
         title,
-        start: new Date(selectedDates.start),
-        end: new Date(selectedDates.end),
+        start: dates.start,
+        end: dates.end,
         color: generateHexColor(),
       };
       createEvent(newEvent, calendarId);
@@ -111,11 +110,15 @@ const Calendar = () => {
         eventDrop={handleEventDrop}
         eventClick={handleEventClick}
       />
-      <CalendarEventModal
-        isOpen={isOpenModalCreate}
-        onClose={onCloseModalCreate}
-        onSubmit={onSubmitModal}
-      />
+      {isOpenModalCreate && (
+        <CalendarEventModal
+          isOpen={isOpenModalCreate}
+          onClose={onCloseModalCreate}
+          onSubmit={onSubmitModal}
+          dates={selectedDates}
+        />
+      )}
+
       {selectedEvent && (
         <CalendarEventsTabsModal
           isOpen={isOpenModalDelete}
