@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { eventsAPI } from "@/features/main/calendar/api";
+import { Event, eventsAPI } from "@/features/main/calendar/api";
 import { EventInput } from "@fullcalendar/core/index.js";
 
 interface Store {
   events: EventInput[];
   getEvents: (calendarId: string) => void;
   createEvent: (event: EventInput, calendarId: string) => void;
-  updateEvent: (event: EventInput, calendarId: string) => void;
+  updateEvent: (event: Event, calendarId: string) => void;
   deleteEvent: (eventId: string, calendarId: string) => void;
 }
 
@@ -24,21 +24,13 @@ const useEventStore = create<Store>()(
       },
       createEvent: async (event: EventInput, calendarId: string) => {
         const response = await eventsAPI.createEvent(event, calendarId);
-
         if (response.data.error) {
           return { error: response.data.error };
         }
         set((state) => ({ events: [...state.events, response.data.event] }));
       },
-      updateEvent: async (event: EventInput, calendarId: string) => {
-        const cleanEvent = {
-          id: Number(event._def.publicId),
-          title: event._def.title,
-          start: event.start,
-          end: event.end,
-        };
-
-        const response = await eventsAPI.updateEvent(cleanEvent, calendarId);
+      updateEvent: async (event: Event, calendarId: string) => {
+        const response = await eventsAPI.updateEvent(event, calendarId);
 
         if (response.data.error) {
           return { error: response.data.error };

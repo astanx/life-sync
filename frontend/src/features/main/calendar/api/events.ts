@@ -17,7 +17,7 @@ const eventsAPI = {
   updateEvent: async (event: Event, calendarId: string) => {
     const response = await eventIntence.put<EventResponse>(
       `/${calendarId}`,
-      event
+      {...event, id: +event.id}
     );
     return response;
   },

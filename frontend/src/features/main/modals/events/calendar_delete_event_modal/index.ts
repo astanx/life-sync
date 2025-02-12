@@ -1,1 +1,1 @@
-export { CalendarDeleteEventModal } from "./CalendarDeleteEventModal.tsx";
+export { CalendarDeleteEventModalContent } from "./CalendarDeleteEventModalContent.tsx";
