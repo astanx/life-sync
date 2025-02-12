@@ -5,6 +5,7 @@ import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { useCalendarStore } from "@/features/main/calendar_content/model";  
 import classes from "./CalendarModal.module.css";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   isOpen: boolean;
@@ -17,11 +18,13 @@ interface FormData {
 const CalendarModal: FC<Props> = ({ isOpen, onClose }) => {
   const createCalendar = useCalendarStore((state) => state.createCalendar);
   const { register, handleSubmit, reset } = useForm<FormData>();
-  const submit = (data: FormData) => {
+  const navigate = useNavigate();
+  const submit = async (data: FormData) => {
     if (data.title) {
-      createCalendar(data.title);
+      const calendarId = await createCalendar(data.title);
       onClose();
       reset();
+      navigate(`${calendarId}`)
     }
   };
   return (

@@ -6,8 +6,8 @@ import { EventInput } from "@fullcalendar/core";
 import classes from "./Calendar.module.css";
 import { useEventStore } from "@/features/main/calendar/model";
 import { generateHexColor } from "@/shared/utils";
-import { CalendarEventModal } from "@/features/main/modals/calendar_event_modal";
-import { CalendarDeleteEventModal } from "@/features/main/modals/calendar_delete_event_modal";
+import { CalendarEventModal } from "@/features/main/modals/events/calendar_event_modal";
+import { CalendarDeleteEventModal } from "@/features/main/modals/events/calendar_delete_event_modal";
 import { useParams } from "react-router-dom";
 
 interface Dates {

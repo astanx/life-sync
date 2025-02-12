@@ -10,8 +10,9 @@ import {
 interface Store {
   email: string;
   id: number;
+  isLogined: boolean;
   login: (user: User) => Promise<Response>;
-  loginFromCookie: () => void;
+  loginFromCookie: () => Promise<void>;
   register: (user: User) => Promise<Response>;
   sendVerificationCode: () => Promise<VerifyCodeResponse>;
   verifyCode: (code: string[]) => Promise<VerifyCodeResponse>;
@@ -22,6 +23,7 @@ const useAuthStore = create<Store>()(
     (set) => ({
       email: "",
       id: 0,
+      isLogined: false,
       login: async (user: User) => {
         try {
           const response = await authAPI.login(user);
@@ -29,7 +31,10 @@ const useAuthStore = create<Store>()(
           if (response.data.error) {
             return { error: response.data.error, id: 0 };
           }
-          set(() => ({ id: response.data.id, email: user.email }));
+          set(() => ({
+            id: response.data.id,
+            email: user.email,
+          }));
 
           return { id: response.data.id };
         } catch (e) {
@@ -43,7 +48,11 @@ const useAuthStore = create<Store>()(
         if (response.data.error) {
           return;
         }
-        set(() => ({ id: response.data.id, email: response.data.email }));
+        set(() => ({
+          id: response.data.id,
+          email: response.data.email,
+          isLogined: true,
+        }));
       },
       register: async (user: User) => {
         try {
@@ -52,7 +61,10 @@ const useAuthStore = create<Store>()(
           if (response.data.error) {
             return { error: response.data.error, id: 0 };
           }
-          set(() => ({ id: response.data.id, email: user.email }));
+          set(() => ({
+            id: response.data.id,
+            email: user.email,
+          }));
 
           return { id: response.data.id };
         } catch (e) {
@@ -81,6 +93,7 @@ const useAuthStore = create<Store>()(
           if (response.data.error) {
             return { error: response.data.error };
           }
+          set(() => ({ isLogined: true }));
           return { message: "Verify success" };
         } catch (e) {
           const errorMessage =

@@ -9,9 +9,11 @@ interface Calendar {
 
 interface Store {
   calendars: Calendar[];
-  createCalendar: (title: string) => void;
+  createCalendar: (title: string) => Promise<string>;
   getCalendars: () => void;
   getCalendarTitle: (calendarId: string) => string;
+  deleteCalendar: (calendarId: string) => Promise<void>;
+  updateCalendar: (title: string, calendarId: string) => Promise<void>;
 }
 
 const useCalendarStore = create<Store>()(
@@ -27,6 +29,7 @@ const useCalendarStore = create<Store>()(
         set((state) => ({
           calendars: [...state.calendars, response.data.calendar],
         }));
+        return response.data.calendar.id;
       },
       getCalendars: async () => {
         const response = await calendarAPI.getCalendars();
@@ -39,6 +42,33 @@ const useCalendarStore = create<Store>()(
       getCalendarTitle: (calendarId: string) => {
         return get().calendars.find((calendar) => calendar.id === +calendarId)!
           .title;
+      },
+      deleteCalendar: async (calendarId: string) => {
+        const response = await calendarAPI.deleteCalendar(calendarId);
+        if (response.data.error) {
+          console.error(response.data.error);
+          return;
+        }
+        set((state) => ({
+          calendars: state.calendars.filter(
+            (calendar) => calendar.id !== +calendarId
+          ),
+        }));
+      },
+      updateCalendar: async (title: string, calendarId: string) => {
+        const response = await calendarAPI.updateCalendar(title, calendarId);
+        if (response.data.error) {
+          console.error(response.data.error);
+          return;
+        }
+        set((state) => ({
+          calendars: state.calendars.map((calendar) => {
+            if (calendar.id === +calendarId) {
+              return { ...calendar, title };
+            }
+            return calendar;
+          }),
+        }));
       },
     }),
 
