@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import classes from './PagesAccordion.module.css'
 import { AddButton } from "@/shared/ui/add_button";
-import { CalendarContent } from "@/features/main/calendar_content/ui";
+import { CalendarContent } from "@/features/main/calendars/calendar_content/ui";
 
 
 const PagesAccordion = () => {

@@ -27,7 +27,7 @@ const VerificationForm = () => {
       return
     }
     setVerifyCodeError("")
-    navigate("/projects")
+    navigate("/dashboard/projects")
   };
 
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);

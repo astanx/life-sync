@@ -1,10 +1,10 @@
-import { Calendar } from "@/features/main/calendar/ui";
+import { Calendar } from "@/features/main/calendars/calendar/ui";
 import classes from "./Calendar.module.css";
-import { AddCalendarButton } from "@/features/main/add_calendar_button";
+import { AddCalendarButton } from "@/features/main/calendars/add_calendar_button";
 import { useParams } from "react-router-dom";
-import { useCalendarStore } from "@/features/main/calendar_content/model";
+import { useCalendarStore } from "@/features/main/calendars/calendar_content/model";
 import { useEffect, useState } from "react";
-import { CalendarTabsModal } from "@/features/main/modals/calendar/calendar_tabs_modal";
+import { CalendarTabsModal } from "@/features/main/calendars/modals/calendar/calendar_tabs_modal";
 
 const CalendarWidget = () => {
   const { calendarId } = useParams();

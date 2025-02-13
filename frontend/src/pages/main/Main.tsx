@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { PagesAccordion } from "@/widgets/main/accordion/pages_accordion";
 import { ProjectsAccordion } from "@/widgets/main/accordion/projects_accordion";
-import { CalendarWidget } from "@/widgets/main/calendar";
 import { Header } from "@/widgets/main/header";
 import classes from "./Main.module.css";
+import { Outlet } from "react-router-dom";
 
 const Main = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,7 +21,7 @@ const Main = () => {
         </div>
 
         <div className={classes.content}>
-          <CalendarWidget />
+          <Outlet />
         </div>
       </div>
     </div>
