@@ -17,7 +17,7 @@ const EventsTable = () => {
           ))}
         </tr>
         <tr>
-          <th className={classes.header}>Stages</th>
+          <th className={classes.stages}>Stages</th>
           {months.map((_, index) => (
             <Fragment key={index}>
               <th className={classes.subtitle}>1W</th>
