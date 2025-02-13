@@ -1,0 +1,21 @@
+
+.modeSwitcher {
+    width: 27%;
+    display: flex;
+    justify-content: space-between;
+    color: #6B7A99;
+    font-size: 14px;
+    font-weight: 1000;
+}
+
+.modeSwitcher span {
+    cursor: pointer;
+}
+
+.modeSwitcher span:hover {
+    color: var(--primary);
+}
+
+.active {
+    color: var(--primary)
+}
