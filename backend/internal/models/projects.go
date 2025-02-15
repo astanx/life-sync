@@ -19,4 +19,5 @@ type Stage struct {
 	Start     time.Time `gorm:"not null;type:date"`
 	End       time.Time `gorm:"not null;type:date"`
 	ProjectID uint      `gorm:"not null"`
+	Userid    uint      `gorm:"not null"`
 }

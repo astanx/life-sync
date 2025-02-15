@@ -44,6 +44,14 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		projectRoutes.DELETE("/:id", DeleteProject(db))
 	}
 
+	projectStagesRoutes := projectRoutes.Group("/stages/:projectid")
+	{
+		projectStagesRoutes.GET("", GetProjectStages(db))
+		projectStagesRoutes.POST("", CreateProjectStage(db))
+		projectStagesRoutes.PUT("", UpdateProjectStage(db))
+		projectStagesRoutes.DELETE("/:id", DeleteProjectStage(db))
+	}
+
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Welcome to lifeSync API"})
 	})
