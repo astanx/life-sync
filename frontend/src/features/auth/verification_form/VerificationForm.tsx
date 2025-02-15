@@ -27,6 +27,7 @@ const VerificationForm = () => {
       return
     }
     setVerifyCodeError("")
+    sessionStorage.setItem("hasRedirected", "true");
     navigate("/dashboard/projects")
   };
 

@@ -13,12 +13,17 @@
     border-spacing: 0;
 }
 
-.tableWrapper:not(:last-child) {
-    border-radius: 0;
+.header,
+.stages,
+.cell:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: white;
 }
 
-.tableWrapper:last-child {
-    border-radius: 0 0 20px 20px;
+.header {
+    z-index: 3;
 }
 
 .header,
@@ -29,15 +34,10 @@
     font-size: 1rem;
     min-width: 120px;
     white-space: nowrap;
-    background: white;
-    position: sticky;
-    left: 0;
-    z-index: 1;
 }
 
 .stages {
     padding-left: 10px;
-    z-index: 2;
 }
 
 .cell {
@@ -60,7 +60,6 @@
     background: #f8f9fa;
 }
 
-/* Border radius */
 thead tr:first-child th {
     border-top-width: 2px;
 }
@@ -106,7 +105,6 @@ tbody tr:last-child td:last-child {
     transform: translateY(-50%);
 }
 
-/* Адаптивность */
 @media (max-width: 1024px) {
     .header,
     .stages {

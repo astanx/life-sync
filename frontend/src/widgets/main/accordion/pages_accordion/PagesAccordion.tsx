@@ -5,16 +5,20 @@ import {
   faHome,
   faMessage,
 } from "@fortawesome/free-solid-svg-icons";
-import classes from './PagesAccordion.module.css'
+import classes from "./PagesAccordion.module.css";
 import { AddButton } from "@/shared/ui/add_button";
 import { CalendarContent } from "@/features/main/calendars/calendar_content/ui";
-
+import { ProjectsContent } from "@/features/main/projects/projects_content/ui";
 
 const PagesAccordion = () => {
   const accordionItems = [
-    { title: "My projects", content: <AddButton title="Add new project"/>, icon: faHome },
+    { title: "My projects", content: <ProjectsContent />, icon: faHome },
     { title: "Chats", content: "Chats content", icon: faMessage },
-    { title: "Tasks", content: <AddButton title="Add new task"/>, icon: faClipboardList },
+    {
+      title: "Tasks",
+      content: <AddButton title="Add new task" />,
+      icon: faClipboardList,
+    },
     { title: "Calendar", content: <CalendarContent />, icon: faCalendar },
   ];
   return (
