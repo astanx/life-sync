@@ -1,36 +1,66 @@
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border-radius: 0 0 20px 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
 .table {
+    width: max-content;
+    min-width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border: none;
 }
 
+.tableWrapper:not(:last-child) {
+    border-radius: 0;
+}
 
-.header, .stages {
+.tableWrapper:last-child {
+    border-radius: 0 0 20px 20px;
+}
+
+.header,
+.stages {
     color: var(--light-blue);
     border: 1px solid #EDEFF2;
-    padding: 16px 80px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    min-width: 120px;
+    white-space: nowrap;
+    background: white;
+    position: sticky;
+    left: 0;
+    z-index: 1;
 }
 
-.stages, .stage {
+.stages {
     padding-left: 10px;
+    z-index: 2;
 }
 
 .cell {
     border: 1px solid #EDEFF2;
     padding: 10px 16px;
-    color: var(--light-blue)
+    color: var(--light-blue);
+    min-width: 80px;
+    height: 40px;
+    background: white;
+    position: relative;
 }
 
 .subtitle {
     color: var(--lightest-blue);
     border: 1px solid #EDEFF2;
-    padding: 11px;
-    font-size: 10px;
+    padding: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 900;
+    min-width: 60px;
+    background: #f8f9fa;
 }
 
-
-
+/* Border radius */
 thead tr:first-child th {
     border-top-width: 2px;
 }
@@ -49,8 +79,6 @@ tbody tr td:last-child {
     border-right-width: 2px;
 }
 
-
-
 thead tr:first-child th:first-child {
     border-top-left-radius: 10px;
 }
@@ -65,4 +93,103 @@ tbody tr:last-child td:first-child {
 
 tbody tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
+}
+
+.stageBlock {
+    background-color: #4CAF50;
+    height: 20px;
+    border-radius: 4px;
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .header,
+    .stages {
+        padding: 1rem 1.5rem;
+        font-size: 0.9rem;
+        min-width: 100px;
+    }
+    
+    .cell {
+        min-width: 70px;
+        padding: 8px 12px;
+    }
+    
+    .subtitle {
+        min-width: 50px;
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .header,
+    .stages {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        min-width: 80px;
+    }
+
+    .subtitle {
+        padding: 0.4rem;
+        font-size: 0.7rem;
+        min-width: 40px;
+    }
+
+    .cell {
+        min-width: 60px;
+        padding: 5px 8px;
+        height: 35px;
+    }
+    
+    .stageBlock {
+        height: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header,
+    .stages {
+        padding: 0.3rem;
+        font-size: 0.7rem;
+        min-width: 60px;
+    }
+
+    .subtitle {
+        padding: 0.2rem;
+        font-size: 0.6rem;
+        min-width: 30px;
+    }
+
+    .cell {
+        min-width: 40px;
+        padding: 2px 3px;
+        height: 25px;
+        font-size: 0.6rem;
+    }
+    
+    .stageBlock {
+        height: 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .header,
+    .stages {
+        font-size: 0.6rem;
+        min-width: 50px;
+    }
+
+    .subtitle {
+        font-size: 0.55rem;
+        min-width: 25px;
+    }
+
+    .cell {
+        min-width: 35px;
+    }
 }

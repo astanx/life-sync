@@ -32,3 +32,16 @@
     color: var(--light-blue);
     font-weight: 900;
 }
+
+
+@media (max-width: 768px) {
+    .responsive {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .responsive .circle {
+        margin-right: 20px;
+        margin-bottom: 0;
+    }
+}

@@ -11,7 +11,7 @@ const Main = () => {
   return (
     <div>
       <Header menuOpen={menuOpen} toggleMenu={() => setMenuOpen(!menuOpen)} />
-      
+
       <div className={classes.container}>
         <div className={`${classes.menu} ${menuOpen ? classes.open : ""}`}>
           <div className={classes.accordion_container}>
@@ -20,9 +20,7 @@ const Main = () => {
           </div>
         </div>
 
-        <div className={classes.content}>
-          <Outlet />
-        </div>
+        <Outlet />
       </div>
     </div>
   );

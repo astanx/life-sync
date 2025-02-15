@@ -9,6 +9,7 @@
     background-color: #fff;
     border-radius: 0 0 20px 20px;
     border-top: 2px solid #F5F6F7;
+    overflow-x: auto;
 }
 
 .calendar_title {

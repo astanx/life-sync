@@ -9,7 +9,7 @@ const EventsTableWidget = () => {
           <div className={classes.table_header}>
             <h1>Project Title</h1>
             <ModeSwitcher />
-            <AddStageButton />
+            <AddStageButton/>
           </div>
           <div className={classes.table}>
             <EventsTable />
