@@ -11,12 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type CalendarResponse struct {
+type ProjectResponse struct {
 	ID    uint   `json:"id"`
 	Title string `json:"title"`
 }
 
-func CreateCalendar(db *gorm.DB) gin.HandlerFunc {
+func CreateProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
 			Title string `json:"title"`
@@ -44,32 +44,32 @@ func CreateCalendar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		newCalendar := models.Calendar{
+		newProject := models.Project{
 			Title:  payload.Title,
 			Userid: uint(userID),
 		}
 
-		result := db.Create(&newCalendar)
+		result := db.Create(&newProject)
 		if result.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 			return
 		}
 
 		response := CalendarResponse{
-			ID:    newCalendar.ID,
-			Title: newCalendar.Title,
+			ID:    newProject.ID,
+			Title: newProject.Title,
 		}
 
-		c.JSON(http.StatusCreated, gin.H{"calendar": response})
+		c.JSON(http.StatusCreated, gin.H{"project": response})
 	}
 }
 
-func UpdateCalendar(db *gorm.DB) gin.HandlerFunc {
+func UpdateProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var payload struct {
-			CalendarID uint   `json:"id"`
-			Title      string `json:"title"`
+			ProjectID uint   `json:"id"`
+			Title     string `json:"title"`
 		}
 
 		if err := c.ShouldBindJSON(&payload); err != nil {
@@ -94,27 +94,27 @@ func UpdateCalendar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var updatedCalendar models.Calendar
-		result := db.First(&updatedCalendar, "id = ? AND userid = ?", payload.CalendarID, userID)
+		var updatedProject models.Project
+		result := db.First(&updatedProject, "id = ? AND userid = ?", payload.ProjectID, userID)
 		if result.Error != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No calendar with that ID exists"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "No project with that ID exists"})
 			return
 		}
 
-		updatedCalendar.Title = payload.Title
+		updatedProject.Title = payload.Title
 
-		db.Save(&updatedCalendar)
+		db.Save(&updatedProject)
 
-		response := CalendarResponse{
-			ID:    updatedCalendar.ID,
-			Title: updatedCalendar.Title,
+		response := ProjectResponse{
+			ID:    updatedProject.ID,
+			Title: updatedProject.Title,
 		}
 
-		c.JSON(http.StatusOK, gin.H{"calendar": response})
+		c.JSON(http.StatusOK, gin.H{"project": response})
 	}
 }
 
-func GetCalendars(db *gorm.DB) gin.HandlerFunc {
+func GetProjects(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, err := getUserClaimsFromCookie(c)
 		if err != nil {
@@ -128,36 +128,36 @@ func GetCalendars(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var calendars []CalendarResponse
+		var projects []ProjectResponse
 
-		result := db.Model(&models.Calendar{}).
+		result := db.Model(&models.Project{}).
 			Select(`id, title`).
 			Where("userid = ?", uint(userID)).
-			Find(&calendars)
+			Find(&projects)
 
 		if result.Error != nil {
-			log.Printf("Error fetching calendars: %v", result.Error)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch calendars"})
+			log.Printf("Error fetching projects: %v", result.Error)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch projects"})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"calendar": calendars})
+		c.JSON(http.StatusOK, gin.H{"project": projects})
 	}
 }
 
-func DeleteCalendar(db *gorm.DB) gin.HandlerFunc {
+func DeleteProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		calendarIDStr := c.Param("id")
+		projectIDStr := c.Param("id")
 
-		if calendarIDStr == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Calendar ID is required"})
+		if projectIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
 			return
 		}
 
-		calendarID, err := strconv.ParseUint(calendarIDStr, 10, 64)
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
 		if err != nil {
-			log.Printf("Error converting calendarID to uint: %v", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid calendar ID format"})
+			log.Printf("Error converting projectID to uint: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
 			return
 		}
 
@@ -175,8 +175,8 @@ func DeleteCalendar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var calendar models.Calendar
-		result := db.First(&calendar, "id = ? AND userid = ?", uint(calendarID), uint(userID))
+		var project models.Project
+		result := db.First(&project, "id = ? AND userid = ?", uint(projectID), uint(userID))
 		if result.Error != nil {
 			log.Printf("Error finding calendar: %v", result.Error)
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -187,13 +187,13 @@ func DeleteCalendar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		result = db.Delete(&calendar)
+		result = db.Delete(&project)
 		if result.Error != nil {
-			log.Printf("Error deleting calendar: %v", result.Error)
+			log.Printf("Error deleting project: %v", result.Error)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Calendar deleted successfully"})
+		c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})
 	}
 }
