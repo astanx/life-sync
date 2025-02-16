@@ -18,7 +18,7 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowAllOrigins:  false,
 		AllowOrigins:     []string{"http://localhost:5173", "https://lifesync-frontend.onrender.com"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
