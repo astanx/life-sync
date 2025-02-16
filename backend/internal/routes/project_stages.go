@@ -21,9 +21,9 @@ type StageResponse struct {
 func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			Title string    `json:"title"`
-			Start time.Time `json:"start" time_format:"2006-01-02"`
-			End   time.Time `json:"end" time_format:"2006-01-02"`
+			Title string    `json:"title" binding:"required"`
+			Start time.Time `json:"start" form:"start" time_format:"2006-01-02" binding:"required"`
+			End   time.Time `json:"end" form:"end" time_format:"2006-01-02" binding:"required"`
 		}
 
 		projectIDStr := c.Param("projectid")
@@ -107,8 +107,8 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		var payload struct {
 			StageID uint      `json:"id"`
 			Title   string    `json:"title"`
-			Start   time.Time `json:"start" time_format:"2006-01-02"`
-			End     time.Time `json:"end" time_format:"2006-01-02"`
+			Start   time.Time `json:"start" form:"start" time_format:"2006-01-02" binding:"required"`
+			End     time.Time `json:"end" form:"end" time_format:"2006-01-02" binding:"required"`
 		}
 
 		projectIDStr := c.Param("projectid")
