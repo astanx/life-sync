@@ -17,6 +17,10 @@ const projectsAPI = {
     const response = await projectsIntence.put(``, { title, id: +projectId });
     return response;
   },
+  updateLastOpened: async (projectId: string) => {
+    const response = await projectsIntence.patch(`/${projectId}`,);
+    return response;
+  }
 };
 
 export { projectsAPI };

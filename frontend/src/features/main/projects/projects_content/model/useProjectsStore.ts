@@ -5,6 +5,7 @@ import { projectsAPI } from "../api";
 interface Project {
   title: string;
   id: number;
+  lastOpened: string;
 }
 
 interface Store {
@@ -14,6 +15,7 @@ interface Store {
   getProjectTitle: (projectId: string) => string;
   deleteProject: (projectId: string) => Promise<void>;
   updateProject: (title: string, projectId: string) => Promise<void>;
+  updateLastOpenedProject: (projectId: string) => void;
 }
 
 const useProjectsStore = create<Store>()(
@@ -26,7 +28,11 @@ const useProjectsStore = create<Store>()(
           console.error(response.data.error);
           return;
         }
-        set(() => ({ projects: response.data.project }));
+        const sorted = response.data.project.sort(
+          (a: Project, b: Project) =>
+            new Date(b.lastOpened).getTime() - new Date(a.lastOpened).getTime()
+        );
+        set(() => ({ projects: sorted }));
       },
       createProject: async (title: string) => {
         const response = await projectsAPI.createProject(title);
@@ -70,6 +76,13 @@ const useProjectsStore = create<Store>()(
             return project;
           }),
         }));
+      },
+      updateLastOpenedProject: async (projectId: string) => {
+        const response = await projectsAPI.updateLastOpened(projectId);
+        if (response.data.error) {
+          console.error(response.data.error);
+        }
+        return;
       },
     }),
 

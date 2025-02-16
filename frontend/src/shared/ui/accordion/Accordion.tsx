@@ -7,44 +7,50 @@ interface AccordionItem {
   title: string;
   content?: string | JSX.Element;
   icon?: IconDefinition;
-
+  id: number;
 }
 
 interface Props {
   items: AccordionItem[];
   light?: boolean;
+  onClick?: (itemId: number) => void;
 }
 
-const Accordion: React.FC<Props> = ({ items, light }) => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+const Accordion: React.FC<Props> = ({ items, light, onClick }) => {
+  const [activeId, setActiveId] = useState<number | null>(null);
 
-  const handleClick = (index: number) => {
-    setActiveIndex(activeIndex === index ? null : index);
+  const handleClick = (itemId: number) => {
+    setActiveId(activeId === itemId ? null : itemId);
+    if (onClick) {
+      onClick(itemId);
+    }
   };
 
   return (
-    <div className={`${classes.accordion} ${light ? "" : classes.dark }`}>
-      {items.map((item, index) => (
+    <div className={`${classes.accordion} ${light ? "" : classes.dark}`}>
+      {items.map((item) => (
         <div
-          key={index}
+          key={item.id}
           className={`${classes.accordion_item} ${
-            activeIndex === index ? classes.active : ""
+            activeId === item.id ? classes.active : ""
           }`}
         >
           <div
             className={classes.accordion_header}
-            onClick={() => handleClick(index)}
+            onClick={() => handleClick(item.id)}
           >
-            {item.icon && <FontAwesomeIcon icon={item.icon} className={classes.icon}/>}
+            {item.icon && (
+              <FontAwesomeIcon icon={item.icon} className={classes.icon} />
+            )}
 
             <span>{item.title}</span>
             <span
               className={`${classes.arrow} ${
-                activeIndex === index ? classes.open : ""
+                activeId === item.id ? classes.open : ""
               }`}
             ></span>
           </div>
-          {activeIndex === index && light && (
+          {activeId === item.id && light && (
             <div className={classes.accordion_content}>
               <div>{item.content}</div>
             </div>
