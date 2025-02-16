@@ -216,7 +216,7 @@ func GetProjectStages(db *gorm.DB) gin.HandlerFunc {
 
 		var stages []StageResponse
 		result = db.Model(&models.Stage{}).
-			Select("id, title, start, end").
+			Select(`id, title, start, "end"`).
 			Where("project_id = ?", projectID).
 			Find(&stages)
 
