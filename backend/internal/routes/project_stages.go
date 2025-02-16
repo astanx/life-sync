@@ -21,14 +21,10 @@ type StageResponse struct {
 func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			Title string    `json:"title" binding:"required"`
-			Start time.Time `json:"start" binding:"required" time_format:"2006-01-02"`
-			End   time.Time `json:"end" binding:"required" time_format:"2006-01-02"`
+			Title string `json:"title" binding:"required"`
+			Start string `json:"start" binding:"required"`
+			End   string `json:"end" binding:"required"`
 		}
-
-		loc, _ := time.LoadLocation("UTC")
-		payload.Start = payload.Start.In(loc)
-		payload.End = payload.End.In(loc)
 
 		projectIDStr := c.Param("projectid")
 		if projectIDStr == "" {
@@ -52,15 +48,21 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if payload.Start.IsZero() || payload.End.IsZero() {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Start and End times are required"})
+		layout := "2006-01-02"
+		startTime, err := time.Parse(layout, payload.Start)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start date format"})
 			return
 		}
 
-		if payload.Start.After(payload.End) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Start time must be before End time"})
+		endTime, err := time.Parse(layout, payload.End)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end date format"})
 			return
 		}
+
+		startTime = startTime.UTC()
+		endTime = endTime.UTC()
 
 		claims, err := getUserClaimsFromCookie(c)
 		if err != nil {
@@ -83,8 +85,8 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 
 		newStage := models.Stage{
 			Title:     payload.Title,
-			Start:     payload.Start,
-			End:       payload.End,
+			Start:     startTime,
+			End:       endTime,
 			Userid:    uint(userID),
 			ProjectID: uint(projectID),
 		}
