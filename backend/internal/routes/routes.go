@@ -42,6 +42,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		projectRoutes.POST("", CreateProject(db))
 		projectRoutes.PUT("", UpdateProject(db))
 		projectRoutes.DELETE("/:id", DeleteProject(db))
+		projectRoutes.PATCH("/:id", UpdateLastOpenedProject(db))
 	}
 
 	projectStagesRoutes := projectRoutes.Group("/stages/:projectid")

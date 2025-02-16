@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -195,5 +196,34 @@ func DeleteProject(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})
+	}
+}
+
+func UpdateLastOpenedProject(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID := c.Param("id")
+
+		claims, err := getUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+			return
+		}
+
+		result := db.Model(&models.Project{}).
+			Where("id = ? AND userid = ?", projectID, uint(userID)).
+			Update("last_opened", time.Now())
+
+		if result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Last opened time updated"})
 	}
 }
