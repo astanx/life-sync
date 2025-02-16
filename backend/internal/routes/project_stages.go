@@ -22,8 +22,8 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
 			Title string    `json:"title"`
-			Start time.Time `json:"start"`
-			End   time.Time `json:"end"`
+			Start time.Time `json:"start" time_format:"2006-01-02"`
+			End   time.Time `json:"end" time_format:"2006-01-02"`
 		}
 
 		projectIDStr := c.Param("projectid")
@@ -107,8 +107,8 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		var payload struct {
 			StageID uint      `json:"id"`
 			Title   string    `json:"title"`
-			Start   time.Time `json:"start"`
-			End     time.Time `json:"end"`
+			Start   time.Time `json:"start" time_format:"2006-01-02"`
+			End     time.Time `json:"end" time_format:"2006-01-02"`
 		}
 
 		projectIDStr := c.Param("projectid")
