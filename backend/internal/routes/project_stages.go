@@ -226,7 +226,7 @@ func GetProjectStages(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"stages": stages})
+		c.JSON(http.StatusOK, gin.H{"stage": stages})
 	}
 }
 
