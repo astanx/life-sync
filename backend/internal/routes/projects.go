@@ -201,7 +201,19 @@ func DeleteProject(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateLastOpenedProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectID := c.Param("id")
+		projectIDStr := c.Param("id")
+
+		if projectIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+			return
+		}
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			log.Printf("Error converting projectID to uint: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
+			return
+		}
 
 		claims, err := getUserClaimsFromCookie(c)
 		if err != nil {
