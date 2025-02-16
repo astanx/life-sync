@@ -22,9 +22,13 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
 			Title string    `json:"title" binding:"required"`
-			Start time.Time `json:"start" form:"start" time_format:"2006-01-02" binding:"required"`
-			End   time.Time `json:"end" form:"end" time_format:"2006-01-02" binding:"required"`
+			Start time.Time `json:"start" time_format:"2006-01-02" binding:"required"`
+			End   time.Time `json:"end" time_format:"2006-01-02" binding:"required"`
 		}
+
+		loc, _ := time.LoadLocation("UTC")
+		payload.Start = payload.Start.In(loc)
+		payload.End = payload.End.In(loc)
 
 		projectIDStr := c.Param("projectid")
 		if projectIDStr == "" {
@@ -107,8 +111,8 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		var payload struct {
 			StageID uint      `json:"id"`
 			Title   string    `json:"title"`
-			Start   time.Time `json:"start" form:"start" time_format:"2006-01-02" binding:"required"`
-			End     time.Time `json:"end" form:"end" time_format:"2006-01-02" binding:"required"`
+			Start   time.Time `json:"start" time_format:"2006-01-02" binding:"required"`
+			End     time.Time `json:"end" time_format:"2006-01-02" binding:"required"`
 		}
 
 		projectIDStr := c.Param("projectid")
