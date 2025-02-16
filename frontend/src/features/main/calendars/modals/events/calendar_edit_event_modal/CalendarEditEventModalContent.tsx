@@ -6,6 +6,7 @@ import { useEventStore } from "@/features/main/calendars/calendar/model";
 import { useParams } from "react-router-dom";
 import classes from "./CalendarEditEventModalContent.module.css";
 import { Event } from "@/features/main/calendars/calendar/api";
+import { toast, ToastContainer } from "react-toastify";
 
 interface Props {
   onClose: () => void;
@@ -23,8 +24,16 @@ const CalendarEditEventModalContent: FC<Props> = ({ onClose, event }) => {
     mode: "onChange",
     defaultValues: {
       title: event.title,
-      start: event.start ? new Date(event.start as string | number | Date).toISOString().slice(0, 16) : "",
-      end: event.end ? new Date(event.end as string | number | Date).toISOString().slice(0, 16) : "",
+      start: event.start
+        ? new Date(event.start as string | number | Date)
+            .toISOString()
+            .slice(0, 16)
+        : "",
+      end: event.end
+        ? new Date(event.end as string | number | Date)
+            .toISOString()
+            .slice(0, 16)
+        : "",
     },
   });
 
@@ -34,23 +43,35 @@ const CalendarEditEventModalContent: FC<Props> = ({ onClose, event }) => {
   useEffect(() => {
     reset({
       title: event.title,
-      start: event.start ? new Date(event.start as string | number | Date).toISOString().slice(0, 16) : "",
-      end: event.end ? new Date(event.end as string | number | Date).toISOString().slice(0, 16) : "",
+      start: event.start
+        ? new Date(event.start as string | number | Date)
+            .toISOString()
+            .slice(0, 16)
+        : "",
+      end: event.end
+        ? new Date(event.end as string | number | Date)
+            .toISOString()
+            .slice(0, 16)
+        : "",
     });
   }, [event, reset]);
-
-  const submit = (data: FormData) => {
-    if (calendarId) {
-      updateEvent(
-        {
-          id: event.id,
-          title: data.title,
-          start: new Date(data.start),
-          end: new Date(data.end),
-        },
-        calendarId
-      );
-      onClose();
+  const submit = async (data: FormData) => {
+    try {
+      if (calendarId) {
+        await updateEvent(
+          {
+            id: event.id,
+            title: data.title,
+            start: new Date(data.start),
+            end: new Date(data.end),
+          },
+          calendarId
+        );
+        toast.success("Event updated successfully!");
+        onClose();
+      }
+    } catch (error) {
+      toast.error("Failed to update event");
     }
   };
 
@@ -77,6 +98,7 @@ const CalendarEditEventModalContent: FC<Props> = ({ onClose, event }) => {
 
         <Button>Save</Button>
       </form>
+      <ToastContainer />
     </>
   );
 };

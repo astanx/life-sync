@@ -64,7 +64,7 @@ const useProjectsStore = create<Store>()(
         }
         set((state) => ({
           projects: state.projects.map((project) => {
-            if (project.id === +project) {
+            if (project.id === +projectId) {
               return { ...project, title };
             }
             return project;

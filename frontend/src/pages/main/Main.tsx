@@ -4,6 +4,8 @@ import { ProjectsAccordion } from "@/widgets/main/accordion/projects_accordion";
 import { Header } from "@/widgets/main/header";
 import classes from "./Main.module.css";
 import { Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Main = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,6 +24,18 @@ const Main = () => {
 
         <Outlet />
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 };

@@ -3,15 +3,14 @@ import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/modal";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
-import classes from "./CalendarEventModal.module.css";
-import { Dates } from "@/features/main/calendars/calendar/ui/Calendar";
+import classes from "./ProjectCreateStageModal.module.css";
+import { useStagesStore } from "../../../stages_table/model";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 interface Props {
   isOpen: boolean;
-  dates: Dates | null;
   onClose: () => void;
-  onSubmit: (title: string, dates: Dates) => void;
 }
 
 interface FormData {
@@ -20,55 +19,48 @@ interface FormData {
   end: string;
 }
 
-const CalendarEventModal: FC<Props> = ({
-  isOpen,
-  dates,
-  onClose,
-  onSubmit,
-}) => {
-  const { register, handleSubmit, reset } = useForm<FormData>({
-    defaultValues: {
-      title: "",
-      start: dates ? new Date(dates.start).toISOString().slice(0, 16) : "",
-      end: dates ? new Date(dates.end).toISOString().slice(0, 16) : "",
-    },
-  });
+const ProjectCreateStageModal: FC<Props> = ({ isOpen, onClose }) => {
+  const { register, handleSubmit, reset } = useForm<FormData>();
+  const createStage = useStagesStore((state) => state.createStage);
+  const { projectId } = useParams();
 
   const submit = (data: FormData) => {
     try {
-      if (data.title && data.start && data.end) {
-        const dates = {
-          start: new Date(data.start).toISOString(),
-          end: new Date(data.end).toISOString(),
+      if (projectId) {
+        const stage = {
+          title: data.title,
+          start: data.start,
+          end: data.end,
+          id: 1,
         };
-        onSubmit(data.title, dates);
-        toast.success("Event created successfully!");
+        createStage(stage, projectId);
+        toast.success("Stage created successfully!");
         onClose();
         reset();
       }
     } catch (error) {
-      toast.error("Failed to create event");
+      toast.error("Failed to create stage");
     }
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2>Create new event for calendar</h2>
+      <h2>Create new stage for project</h2>
       <form onSubmit={handleSubmit(submit)} className={classes.form}>
         <Input
           label="Title"
           type="text"
-          placeholder="Enter event title"
+          placeholder="Enter stage title"
           {...register("title", { required: true })}
         />
         <Input
           label="Start Date"
-          type="datetime-local"
+          type="date"
           {...register("start", { required: true })}
         />
         <Input
           label="End Date"
-          type="datetime-local"
+          type="date"
           {...register("end", { required: true })}
         />
         <Button>Submit</Button>
@@ -77,4 +69,4 @@ const CalendarEventModal: FC<Props> = ({
   );
 };
 
-export { CalendarEventModal };
+export { ProjectCreateStageModal };

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import classes from "./ProjectDeleteModalContent.module.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { useProjectsStore } from "@/features/main/projects/projects_content/model";
+import { toast } from "react-toastify";
 
 interface Props {
   onClose: () => void;
@@ -16,10 +17,15 @@ const ProjectDeleteModalContent: FC<Props> = ({ onClose }) => {
   const navigate = useNavigate();
 
   const submit = () => {
-    if (projectId) {
-      deleteProject(projectId);
-      onClose();
-      navigate("/dashboard");
+    try {
+      if (projectId) {
+        deleteProject(projectId);
+        toast.success("Project deleted successfully!");
+        onClose();
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast.error("Failed to delete project");
     }
   };
   return (

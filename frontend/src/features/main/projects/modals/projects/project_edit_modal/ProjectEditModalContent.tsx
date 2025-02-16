@@ -5,13 +5,14 @@ import classes from "./ProjectEditModalContent.module.css";
 import { useParams } from "react-router-dom";
 import { Input } from "@/shared/ui/input";
 import { useProjectsStore } from "@/features/main/projects/projects_content/model";
+import { toast } from "react-toastify";
 
 interface Props {
   onClose: () => void;
 }
 
 interface FormData {
-  title: string
+  title: string;
 }
 
 const ProjectEditModalContent: FC<Props> = ({ onClose }) => {
@@ -24,12 +25,16 @@ const ProjectEditModalContent: FC<Props> = ({ onClose }) => {
     },
   });
   const submit = async (data: FormData) => {
-    if (projectId){
-      updateProject(data.title, projectId)
-      onClose();
-      reset();
+    try {
+      if (projectId) {
+        await updateProject(data.title, projectId);
+        toast.success("Project updated successfully!");
+        onClose();
+        reset();
+      }
+    } catch (error) {
+      toast.error("Failed to update project");
     }
-
   };
   return (
     <>

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import classes from "./CalendarDeleteEventModalContent.module.css";
 import { useEventStore } from "@/features/main/calendars/calendar/model";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface Props {
   onClose: () => void;
@@ -14,10 +15,15 @@ const CalendarDeleteEventModalContent: FC<Props> = ({ onClose, id }) => {
   const { handleSubmit } = useForm<FormData>();
   const { calendarId } = useParams();
   const deleteEvent = useEventStore((state) => state.deleteEvent);
-  const submit = () => {
-    if (calendarId) {
-      deleteEvent(id, calendarId);
-      onClose();
+  const submit = async () => {
+    try {
+      if (calendarId) {
+        await deleteEvent(id, calendarId);
+        toast.error("Event deleted successfully");
+        onClose();
+      }
+    } catch (error) {
+      toast.error("Failed to delete event");
     }
   };
   return (

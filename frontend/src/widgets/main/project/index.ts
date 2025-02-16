@@ -1,1 +1,1 @@
-export {EventsTableWidget} from './EventsTable.tsx'
+export { ProjectWidget } from "./Project.tsx";

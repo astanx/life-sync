@@ -3,9 +3,10 @@ import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/modal";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
-import { useCalendarStore } from "@/features/main/calendars/calendar_content/model";  
+import { useCalendarStore } from "@/features/main/calendars/calendar_content/model";
 import classes from "./CalendarModal.module.css";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface Props {
   isOpen: boolean;
@@ -20,11 +21,16 @@ const CalendarModal: FC<Props> = ({ isOpen, onClose }) => {
   const { register, handleSubmit, reset } = useForm<FormData>();
   const navigate = useNavigate();
   const submit = async (data: FormData) => {
-    if (data.title) {
-      const calendarId = await createCalendar(data.title);
-      onClose();
-      reset();
-      navigate(`${calendarId}`)
+    try {
+      if (data.title) {
+        const calendarId = await createCalendar(data.title);
+        toast.success("Calendar created successfully!");
+        onClose();
+        reset();
+        navigate(`${calendarId}`);
+      }
+    } catch (error) {
+      toast.error("Failed to create calendar");
     }
   };
   return (

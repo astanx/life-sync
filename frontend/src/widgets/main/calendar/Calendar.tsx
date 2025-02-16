@@ -17,7 +17,7 @@ const CalendarWidget = () => {
     if (calendarId){
       setCalendarTitle(getCalendarTitle(calendarId));
     }
-  }, [calendarId, getCalendarTitle, isOpenModal, setIsOpenModal]);
+  }, [calendarId, getCalendarTitle, isOpenModal]);
 
   const onModalClose = () => {
     setIsOpenModal(false);

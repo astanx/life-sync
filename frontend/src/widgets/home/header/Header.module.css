@@ -6,7 +6,7 @@
 }
 
 .button_container {
-    width: 450px;
+    width: 600px;
     height: 100px;
     display: flex;
     justify-content: space-between;
@@ -15,19 +15,20 @@
 
 @media (max-width: 1200px) {
     .button_container {
-        width: 300px;
+        width: 450px;
     }
 }
 
 @media (max-width: 1000px) {
     .button_container {
-        width: 250px;
+        width: 350px;
     }
 }
 
 @media (max-width: 700px) {
     .button_container {
         flex-direction: column;
+        gap: 5px;
     }
 }
 

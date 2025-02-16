@@ -1,5 +1,5 @@
-import { Fragment } from "react";
-import classes from "./EventsTable.module.css";
+import { Fragment, useEffect, useState } from "react";
+import classes from "./StagesTable.module.css";
 import {
   format,
   eachWeekOfInterval,
@@ -14,13 +14,11 @@ import {
   isBefore,
   isAfter,
 } from "date-fns";
-
-interface Stage {
-  id: number;
-  title: string;
-  start: string;
-  end: string;
-}
+import { useStagesStore } from "@/features/main/projects/stages_table/model";
+import { ProjectCreateStageModal } from "@/features/main/projects/modals/stages/project_create_stage_modal";
+import { useParams } from "react-router-dom";
+import { ProjectStagesTabsModal } from "@/features/main/projects/modals/stages/project_stages_tabs_modal";
+import { Stage } from "@/features/main/projects/stages_table/api";
 
 interface MonthData {
   name: string;
@@ -28,13 +26,22 @@ interface MonthData {
   weeks: Date[];
 }
 
-const EventsTable = () => {
-  const stages: Stage[] = [
-    { id: 1, title: "Stage 1", start: "2024-11-10", end: "2024-12-10" },
-    { id: 2, title: "Stage 2", start: "2024-11-19", end: "2025-12-18" },
-    { id: 3, title: "Stage 3", start: "2025-01-19", end: "2025-11-18" },
-    { id: 4, title: "Stage 4", start: "2024-01-19", end: "2025-10-18" },
-  ];
+interface ProjectParams extends Record<string, string | undefined> {
+  projectId?: string;
+}
+
+const StagesTable = () => {
+  const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
+  const [isOpenModalTabs, setIsOpenModalTabs] = useState(false);
+  const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
+  const { projectId } = useParams<ProjectParams>();
+
+  const stages = useStagesStore((state) => state.stages);
+  const getStages = useStagesStore((state) => state.getStages);
+
+  useEffect(() => {
+    if (projectId) getStages(projectId);
+  }, [getStages, projectId]);
 
   const getAllMonths = (): MonthData[] => {
     const allMonths = new Set<string>();
@@ -42,16 +49,12 @@ const EventsTable = () => {
     stages.forEach((stage) => {
       const start = parseISO(stage.start);
       const end = parseISO(stage.end);
-      
       const months = eachMonthOfInterval({ start, end });
-      months.forEach(month => {
-        const monthKey = format(month, "yyyy-MM");
-        allMonths.add(monthKey);
-      });
+      months.forEach((month) => allMonths.add(format(month, "yyyy-MM")));
     });
 
     return Array.from(allMonths)
-      .map(monthKey => {
+      .map((monthKey) => {
         const date = parseISO(monthKey + "-01");
         return {
           name: format(date, "MMMM yyyy"),
@@ -59,16 +62,28 @@ const EventsTable = () => {
           weeks: eachWeekOfInterval(
             { start: startOfMonth(date), end: endOfMonth(date) },
             { weekStartsOn: 1 }
-          )
+          ),
         };
       })
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   };
 
-  const isWeekInStage = (weekStart: Date, weekEnd: Date, stage: Stage): boolean => {
+  const onCloseModalCreate = () => {
+    setIsOpenModalCreate(false);
+  };
+
+  const onCloseModalTabs = () => {
+    setIsOpenModalTabs(false);
+    setSelectedStage(null);
+  };
+
+  const isWeekInStage = (
+    weekStart: Date,
+    weekEnd: Date,
+    stage: Stage
+  ): boolean => {
     const stageStart = parseISO(stage.start);
     const stageEnd = parseISO(stage.end);
-
     return (
       isWithinInterval(weekStart, { start: stageStart, end: stageEnd }) ||
       isWithinInterval(weekEnd, { start: stageStart, end: stageEnd }) ||
@@ -78,32 +93,35 @@ const EventsTable = () => {
 
   const chunkArray = <T,>(array: T[], size: number): T[][] => {
     const result = [];
-    for (let i = 0; i < array.length; i += size) {
+    for (let i = 0; i < array.length; i += size)
       result.push(array.slice(i, i + size));
-    }
     return result;
   };
 
-  const allMonths = getAllMonths();
-  const monthGroups = chunkArray(allMonths, 3);
+  if (stages){
+    const allMonths = getAllMonths();
+    const monthGroups = chunkArray(allMonths, 3);  
+  
 
   const isStageInGroup = (stage: Stage, groupMonths: MonthData[]): boolean => {
     const stageStart = parseISO(stage.start);
     const stageEnd = parseISO(stage.end);
-    
-    return groupMonths.some(month => {
+    return groupMonths.some((month) => {
       const monthStart = startOfMonth(month.date);
       const monthEnd = endOfMonth(month.date);
-      return isWithinInterval(monthStart, { start: stageStart, end: stageEnd }) ||
-             isWithinInterval(monthEnd, { start: stageStart, end: stageEnd }) ||
-             (isBefore(monthStart, stageStart) && isAfter(monthEnd, stageEnd));
+      return (
+        isWithinInterval(monthStart, { start: stageStart, end: stageEnd }) ||
+        isWithinInterval(monthEnd, { start: stageStart, end: stageEnd }) ||
+        (isBefore(monthStart, stageStart) && isAfter(monthEnd, stageEnd))
+      );
     });
   };
 
   return (
-    <div>
+    <>
+
       {monthGroups.map((group, groupIndex) => {
-        const filteredStages = stages.filter(stage => 
+        const filteredStages = stages.filter((stage) =>
           isStageInGroup(stage, group)
         );
 
@@ -146,16 +164,20 @@ const EventsTable = () => {
                     {group.map((month, monthIndex) => (
                       <Fragment key={`${stage.id}-${monthIndex}`}>
                         {month.weeks.map((week, weekIndex) => {
-                          const weekStart = startOfWeek(week, { weekStartsOn: 1 });
+                          const weekStart = startOfWeek(week, {
+                            weekStartsOn: 1,
+                          });
                           const weekEnd = endOfWeek(week, { weekStartsOn: 1 });
-
                           return (
                             <td
                               key={`${stage.id}-${monthIndex}-${weekIndex}`}
                               className={classes.cell}
                             >
                               {isWeekInStage(weekStart, weekEnd, stage) && (
-                                <div className={classes.stageBlock}></div>
+                                <div
+                                  className={classes.stageBlock}
+                                  onClick={() => setSelectedStage(stage)}
+                                />
                               )}
                             </td>
                           );
@@ -169,8 +191,24 @@ const EventsTable = () => {
           </div>
         );
       })}
-    </div>
+
+      {isOpenModalCreate && (
+        <ProjectCreateStageModal
+          isOpen={isOpenModalCreate}
+          onClose={onCloseModalCreate}
+        />
+      )}
+
+      {selectedStage && (
+        <ProjectStagesTabsModal
+          isOpen={isOpenModalTabs}
+          stage={selectedStage}
+          onClose={onCloseModalTabs}
+        />
+      )}
+    </>
   );
+}
 };
 
-export { EventsTable };
+export { StagesTable };

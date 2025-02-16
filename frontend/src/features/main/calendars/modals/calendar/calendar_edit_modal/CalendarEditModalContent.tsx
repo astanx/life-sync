@@ -5,6 +5,7 @@ import classes from "./CalendarEditModalContent.module.css";
 import { useParams } from "react-router-dom";
 import { useCalendarStore } from "@/features/main/calendars/calendar_content/model";
 import { Input } from "@/shared/ui/input";
+import { toast } from "react-toastify";
 
 interface Props {
   onClose: () => void;
@@ -23,13 +24,18 @@ const CalendarEditModalContent: FC<Props> = ({ onClose }) => {
       title: getCalendarTitle(calendarId || "1"),
     },
   });
-  const submit = async (data: FormData) => {
-    if (calendarId){
-      updateCalendar(data.title, calendarId)
-      onClose();
-      reset();
-    }
 
+  const submit = async (data: FormData) => {
+    try {
+      if (calendarId) {
+        await updateCalendar(data.title, calendarId);
+        toast.success("Calendar updated successfully!");
+        onClose();
+        reset();
+      }
+    } catch (error) {
+      toast.error("Failed to update calendar");
+    }
   };
   return (
     <>

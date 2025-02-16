@@ -17,7 +17,7 @@ const Home = () => {
     loginFromCookie().then(() => {
       if (isLogined && !hasRedirected) {
         sessionStorage.setItem("hasRedirected", "true");
-        navigate("/dashboard/projects");
+        navigate("/dashboard");
       }
     });
   }, [loginFromCookie, navigate, isLogined]);

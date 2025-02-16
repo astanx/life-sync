@@ -28,7 +28,7 @@ const VerificationForm = () => {
     }
     setVerifyCodeError("")
     sessionStorage.setItem("hasRedirected", "true");
-    navigate("/dashboard/projects")
+    navigate("/dashboard")
   };
 
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);

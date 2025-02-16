@@ -4,8 +4,6 @@ import { Event, EventResponse, GetEventResponse } from "./types";
 
 const eventsAPI = {
   createEvent: async (event: EventInput, calendarId: string) => {
-    console.log(event);
-    
     const response = await eventIntence.post<EventResponse>(
       `/${calendarId}`,
       event
@@ -17,10 +15,10 @@ const eventsAPI = {
     return response;
   },
   updateEvent: async (event: Event, calendarId: string) => {
-    const response = await eventIntence.put<EventResponse>(
-      `/${calendarId}`,
-      {...event, id: +event.id}
-    );
+    const response = await eventIntence.put<EventResponse>(`/${calendarId}`, {
+      ...event,
+      id: +event.id,
+    });
     return response;
   },
   deleteEvent: async (eventId: string, calendarId: string) => {
