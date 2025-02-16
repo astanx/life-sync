@@ -22,8 +22,8 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
 			Title string    `json:"title" binding:"required"`
-			Start time.Time `json:"start" time_format:"2006-01-02" binding:"required"`
-			End   time.Time `json:"end" time_format:"2006-01-02" binding:"required"`
+			Start time.Time `json:"start" binding:"required" time_format:"2006-01-02"`
+			End   time.Time `json:"end" binding:"required" time_format:"2006-01-02"`
 		}
 
 		loc, _ := time.LoadLocation("UTC")
@@ -111,8 +111,8 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		var payload struct {
 			StageID uint      `json:"id"`
 			Title   string    `json:"title"`
-			Start   time.Time `json:"start" time_format:"2006-01-02" binding:"required"`
-			End     time.Time `json:"end" time_format:"2006-01-02" binding:"required"`
+			Start   time.Time `json:"start" binding:"required" time_format:"2006-01-02"`
+			End     time.Time `json:"end" binding:"required" time_format:"2006-01-02"`
 		}
 
 		projectIDStr := c.Param("projectid")
