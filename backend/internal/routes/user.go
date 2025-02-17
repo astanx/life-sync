@@ -203,3 +203,23 @@ func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "Deleted successfully"})
 	}
 }
+
+func LogoutUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cookie := http.Cookie{
+			Name:     "token",
+			Value:    "",
+			Path:     "/",
+			Domain:   "lifesync-backend.onrender.com",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+			Expires:  time.Now().Add(-1 * time.Hour),
+		}
+
+		http.SetCookie(c.Writer, &cookie)
+
+		c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
+	}
+}
