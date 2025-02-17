@@ -21,6 +21,10 @@ const authAPI = {
     const response = await intence.post("/verification", { code });
     return response;
   },
+  logout: async() => {
+    const response = await intence.patch("");
+    return response;
+  }
 };
 
 export { authAPI };

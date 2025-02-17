@@ -9,8 +9,10 @@
     border-radius: 20px;
     border: 2px solid #EDEFF2;
     padding: 10px;
-    color: var(--light-blue)
-}   
+    color: var(--light-blue);
+    margin-top: 10px;
+}
+
 .accordion_container h6 {
     font-size: 12px;
     font-weight: bold;

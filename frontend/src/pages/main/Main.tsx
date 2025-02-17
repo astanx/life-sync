@@ -6,9 +6,14 @@ import classes from "./Main.module.css";
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuthRedirect } from "@/shared/hooks";
 
 const Main = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const isAuth = useAuthRedirect();
+
+  if (!isAuth) return null;
 
   return (
     <div>

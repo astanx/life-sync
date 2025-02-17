@@ -16,6 +16,7 @@ interface Store {
   register: (user: User) => Promise<Response>;
   sendVerificationCode: () => Promise<VerifyCodeResponse>;
   verifyCode: (code: string[]) => Promise<VerifyCodeResponse>;
+  logout: () => Promise<void>;
 }
 
 const useAuthStore = create<Store>()(
@@ -100,6 +101,13 @@ const useAuthStore = create<Store>()(
             e instanceof Error ? e.message : "An unknown error occurred";
           return { error: errorMessage };
         }
+      },
+      logout: async () => {
+        const response = await authAPI.logout();
+        if (response.data.error) {
+          console.error(response.data.error);
+        }
+        set(() => ({ isLogined: false, id: 0, email: "" }));
       },
     }),
 
