@@ -132,8 +132,8 @@ func GetProjects(db *gorm.DB) gin.HandlerFunc {
 		var projects []ProjectResponse
 
 		result := db.Model(&models.Project{}).
-			Select(`id, title`).
-			Where("userid = ?", uint(userID)).
+			Select("id, title").
+			Where("userid = ? OR ? = ANY(collaborator_user_ids)", uint(userID), uint(userID)).
 			Find(&projects)
 
 		if result.Error != nil {
@@ -203,36 +203,26 @@ func UpdateLastOpenedProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectIDStr := c.Param("id")
 
-		if projectIDStr == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
-			return
-		}
-
-		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
-		if err != nil {
-			log.Printf("Error converting projectID to uint: %v", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
-			return
-		}
-
 		claims, err := getUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
+		userID := uint(claims["userid"].(float64))
 
-		userID, ok := claims["userid"].(float64)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		var project models.Project
+
+		err = db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectIDStr, userID, userID).
+			First(&project).Error
+
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Project access denied"})
 			return
 		}
 
-		result := db.Model(&models.Project{}).
-			Where("id = ? AND userid = ?", projectID, uint(userID)).
-			Update("last_opened", time.Now())
-
-		if result.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		if err := db.Model(&project).Update("last_opened", time.Now()).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 

@@ -8,9 +8,11 @@ import (
 
 type Project struct {
 	gorm.Model
-	Title  string  `gorm:"not null"`
-	Userid uint    `gorm:"not null"`
-	Stages []Stage `gorm:"foreignKey:ProjectID"`
+	Title               string `gorm:"not null"`
+	Userid              uint   `gorm:"not null"`
+	LastOpened          time.Time
+	CollaboratorUserIDs []uint  `gorm:"type:integer[]"`
+	Stages              []Stage `gorm:"foreignKey:ProjectID"`
 }
 
 type Stage struct {
