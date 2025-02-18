@@ -16,6 +16,7 @@ interface Store {
   deleteProject: (projectId: string) => Promise<void>;
   updateProject: (title: string, projectId: string) => Promise<void>;
   updateLastOpenedProject: (projectId: string) => void;
+  addCollaborator: (projectId: string, collaboratorId: number) => void;
 }
 
 const useProjectsStore = create<Store>()(
@@ -79,6 +80,16 @@ const useProjectsStore = create<Store>()(
       },
       updateLastOpenedProject: async (projectId: string) => {
         const response = await projectsAPI.updateLastOpened(projectId);
+        if (response.data.error) {
+          console.error(response.data.error);
+        }
+        return;
+      },
+      addCollaborator: async (projectId: string, collaboratorId: number) => {
+        const response = await projectsAPI.addCollaborator(
+          projectId,
+          collaboratorId
+        );
         if (response.data.error) {
           console.error(response.data.error);
         }

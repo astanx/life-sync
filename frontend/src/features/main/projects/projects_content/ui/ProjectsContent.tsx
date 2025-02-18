@@ -1,10 +1,14 @@
 import { AddProjectButton } from "@/features/main/projects/add_project_button";
-import { useEffect } from "react";
+import { FC, useEffect } from "react";
 import { useProjectsStore } from "@/features/main/projects/projects_content/model";
 import classes from "./ProjectsContent.module.css";
 import { useNavigate } from "react-router-dom";
 
-const ProjectsContent = () => {
+interface Props {
+  closeMenu: () => void;
+}
+
+const ProjectsContent: FC<Props> = ({ closeMenu }) => {
   const getProjects = useProjectsStore((state) => state.getProjects);
   const projects = useProjectsStore((state) => state.projects);
   const navigate = useNavigate();
@@ -18,21 +22,25 @@ const ProjectsContent = () => {
 
   const handleClick = async (id: number) => {
     await updateLastOpenedProject(id.toString());
-    await getProjects()
+    await getProjects();
+    closeMenu();
     navigate(`/dashboard/project/${id}`);
   };
 
   return (
     <div>
-      {projects.slice(-5).reverse().map((project) => (
-        <p
-          key={project.id}
-          className={classes.project}
-          onClick={() => handleClick(project.id)}
-        >
-          {project.title}
-        </p>
-      ))}
+      {projects
+        .slice(-5)
+        .reverse()
+        .map((project) => (
+          <p
+            key={project.id}
+            className={classes.project}
+            onClick={() => handleClick(project.id)}
+          >
+            {project.title}
+          </p>
+        ))}
       <AddProjectButton />
     </div>
   );

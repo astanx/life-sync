@@ -9,10 +9,15 @@ import classes from "./PagesAccordion.module.css";
 import { AddButton } from "@/shared/ui/add_button";
 import { CalendarContent } from "@/features/main/calendars/calendar_content/ui";
 import { ProjectsContent } from "@/features/main/projects/projects_content/ui";
+import { FC } from "react";
 
-const PagesAccordion = () => {
+interface Props {
+  closeMenu: () => void
+}
+
+const PagesAccordion: FC<Props> = ({closeMenu}) => {
   const accordionItems = [
-    { title: "My projects", content: <ProjectsContent />, icon: faHome, id: 1 },
+    { title: "My projects", content: <ProjectsContent closeMenu={closeMenu}/>, icon: faHome, id: 1 },
     { title: "Chats", content: "Chats content", icon: faMessage, id: 2 },
     {
       title: "Tasks",
@@ -20,7 +25,7 @@ const PagesAccordion = () => {
       icon: faClipboardList,
       id: 3
     },
-    { title: "Calendar", content: <CalendarContent />, icon: faCalendar, id: 4 },
+    { title: "Calendar", content: <CalendarContent closeMenu={closeMenu}/>, icon: faCalendar, id: 4 },
   ];
   return (
     <div className={classes.accordion_container}>

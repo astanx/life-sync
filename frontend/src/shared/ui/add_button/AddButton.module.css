@@ -38,6 +38,7 @@
     .responsive {
         flex-direction: row;
         align-items: center;
+        scale: 0.8;
     }
 
     .responsive .circle {

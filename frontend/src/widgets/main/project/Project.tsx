@@ -6,10 +6,13 @@ import { useProjectsStore } from "@/features/main/projects/projects_content/mode
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ProjectTabsModal } from "@/features/main/projects/modals/projects/project_tabs_modal";
+import { AddButton } from "@/shared/ui/add_button";
+import { AddCollaboratorModal } from "@/features/main/projects/modals/projects/add_collaborator_modal";
 
 const ProjectWidget = () => {
   const getProjectTitle = useProjectsStore((state) => state.getProjectTitle);
-  const [isOpenModal, setIsOpenModal] = useState(false)
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isOpenCollaboratorModal, setIsOpenCollaboratorModal] = useState(false);
 
   const { projectId } = useParams();
 
@@ -22,27 +25,40 @@ const ProjectWidget = () => {
   }, [projectId, isOpenModal]);
 
   const handleCloseModal = () => {
-    setIsOpenModal(false)
-  }
+    setIsOpenModal(false);
+  };
   const handleClick = () => {
-    setIsOpenModal(true)
+    setIsOpenModal(true);
+  };
+
+  const handleOpenCollaboratorModal = () => {
+    setIsOpenCollaboratorModal(true);
+  };
+
+  const handleCloseCollaboratorModal = () => {
+    setIsOpenCollaboratorModal(false);
   }
 
   return (
     <>
-        <div className={classes.table_container}>
-      <div className={classes.table_header}>
-        <h1 onClick={handleClick}>{title}</h1>
-        <ModeSwitcher />
-        <AddStageButton />
+      <div className={classes.table_container}>
+        <div className={classes.table_header}>
+          <div className={classes.titleWrapper}>
+            <h1 onClick={handleClick}>{title}</h1>
+            <div className={classes.addButtonWrapper}>
+              <AddButton title="Add collaborator" onClick={handleOpenCollaboratorModal}/>
+            </div>
+          </div>
+          <ModeSwitcher />
+          <AddStageButton />
+        </div>
+        <div className={classes.table}>
+          <StagesTable />
+        </div>
       </div>
-      <div className={classes.table}>
-        <StagesTable />
-      </div>
-    </div>
-    <ProjectTabsModal isOpen={isOpenModal} onClose={handleCloseModal}/>
+      <ProjectTabsModal isOpen={isOpenModal} onClose={handleCloseModal} />
+      <AddCollaboratorModal isOpen={isOpenCollaboratorModal} onClose={handleCloseCollaboratorModal} />
     </>
-
   );
 };
 

@@ -24,6 +24,18 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     gap: 15px;
     flex-wrap: wrap;
+    position: relative;
+}
+
+.titleWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.addButtonWrapper {
+    scale: 0.8;
 }
 
 .table_header h1 {
@@ -35,6 +47,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    position: relative;
+    display: inline-block;
 }
 
 @media (min-width: 1200px) {
@@ -49,7 +63,7 @@
         width: 95%;
         padding: 15px;
     }
-    
+
     .table_header h1 {
         font-size: 20px;
     }
@@ -61,12 +75,12 @@
         border-radius: 15px;
         padding: 15px;
     }
-    
+
     .table_header {
         padding: 10px 15px;
         gap: 10px;
     }
-    
+
     .table_header h1 {
         font-size: 18px;
         max-width: 200px;
@@ -78,14 +92,18 @@
         padding: 8px;
         border-radius: 12px;
     }
-    
+
     .table_header {
         padding: 6px 8px;
     }
-    
+
     .table_header h1 {
         font-size: 14px;
         max-width: 100px;
+    }
+
+    .addButtonWrapper {
+        scale: 0.7;
     }
 }
 
@@ -94,8 +112,12 @@
         font-size: 13px;
         max-width: 80px;
     }
-    
+
     .table_container {
         padding: 5px;
+    }
+
+    .addButtonWrapper {
+        scale: 0.6;
     }
 }

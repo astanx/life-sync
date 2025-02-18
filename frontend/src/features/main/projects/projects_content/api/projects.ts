@@ -18,9 +18,16 @@ const projectsAPI = {
     return response;
   },
   updateLastOpened: async (projectId: string) => {
-    const response = await projectsIntence.patch(`/${projectId}`,);
+    const response = await projectsIntence.patch(`/${projectId}`);
     return response;
-  }
+  },
+  addCollaborator: async (projectId: string, collaboratorId: number) => {
+    const response = await projectsIntence.post(
+      `/${projectId}/collaborators`,
+      { id: collaboratorId }
+    );
+    return response;
+  },
 };
 
 export { projectsAPI };

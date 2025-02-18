@@ -15,15 +15,17 @@ const Main = () => {
 
   if (!isAuth) return null;
 
+  const closeMenu = () => setMenuOpen(false)
+
   return (
     <div>
-      <Header menuOpen={menuOpen} toggleMenu={() => setMenuOpen(!menuOpen)} />
+      <Header menuOpen={menuOpen} toggleMenu={() => setMenuOpen(prev => !prev)} />
 
       <div className={classes.container}>
         <div className={`${classes.menu} ${menuOpen ? classes.open : ""}`}>
           <div className={classes.accordion_container}>
-            <PagesAccordion />
-            <ProjectsAccordion />
+            <PagesAccordion closeMenu={closeMenu}/>
+            <ProjectsAccordion closeMenu={closeMenu}/>
           </div>
         </div>
 

@@ -1,10 +1,14 @@
 import { useCalendarStore } from "@/features/main/calendars/calendar_content/model";
 import classes from "./CalendarContent.module.css";
 import { AddCalendarButton } from "@/features/main/calendars/add_calendar_button";
-import { useEffect } from "react";
+import { FC, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const CalendarContent = () => {
+interface Props {
+  closeMenu: () => void;
+}
+
+const CalendarContent: FC<Props> = ({ closeMenu }) => {
   const getCalendars = useCalendarStore((state) => state.getCalendars);
   const calendars = useCalendarStore((state) => state.calendars);
   const navigate = useNavigate();
@@ -14,6 +18,7 @@ const CalendarContent = () => {
   }, [getCalendars]);
 
   const handleClick = (id: number) => {
+    closeMenu();
     navigate(`/dashboard/calendar/${id}`);
   };
 
