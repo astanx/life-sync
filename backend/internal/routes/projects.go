@@ -203,6 +203,18 @@ func UpdateLastOpenedProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectIDStr := c.Param("id")
 
+		if projectIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+			return
+		}
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			log.Printf("Error converting projectID to uint: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
+			return
+		}
+
 		claims, err := getUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -213,7 +225,7 @@ func UpdateLastOpenedProject(db *gorm.DB) gin.HandlerFunc {
 		var project models.Project
 
 		err = db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
-			projectIDStr, userID, userID).
+			projectID, userID, userID).
 			First(&project).Error
 
 		if err != nil {
