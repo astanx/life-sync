@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -11,8 +12,8 @@ type Project struct {
 	Title               string `gorm:"not null"`
 	Userid              uint   `gorm:"not null"`
 	LastOpened          time.Time
-	CollaboratorUserIDs []int8  `gorm:"type:integer[]"`
-	Stages              []Stage `gorm:"foreignKey:ProjectID"`
+	CollaboratorUserIDs pq.Int64Array `gorm:"type:integer[]"`
+	Stages              []Stage       `gorm:"foreignKey:ProjectID"`
 }
 
 type Stage struct {

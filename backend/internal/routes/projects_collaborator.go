@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -52,8 +53,7 @@ func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 				return
 			}
 		}
-
-		project.CollaboratorUserIDs = append(project.CollaboratorUserIDs, int8(payload.UserID))
+		project.CollaboratorUserIDs = append(project.CollaboratorUserIDs, int64(payload.UserID))
 		if err := db.Save(&project).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -86,15 +86,15 @@ func RemoveCollaborator(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		collaboratorID, err := strconv.ParseUint(userID, 10, 64)
+		collaboratorID, err := strconv.ParseInt(userID, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 			return
 		}
 
-		newCollaborators := make([]int8, 0)
+		newCollaborators := make(pq.Int64Array, 0)
 		for _, id := range project.CollaboratorUserIDs {
-			if id != int8(collaboratorID) {
+			if id != collaboratorID {
 				newCollaborators = append(newCollaborators, id)
 			}
 		}
