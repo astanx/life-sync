@@ -2,6 +2,7 @@ package routes
 
 import (
 	"lifeSync/internal/models"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,19 @@ import (
 
 func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectID := c.Param("id")
+		projectIDStr := c.Param("id")
+
+		if projectIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+			return
+		}
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			log.Printf("Error converting projectID to uint: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
+			return
+		}
 
 		var payload struct {
 			UserID uint `json:"id" binding:"required"`
@@ -65,7 +78,20 @@ func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 
 func RemoveCollaborator(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectID := c.Param("id")
+		projectIDStr := c.Param("id")
+
+		if projectIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+			return
+		}
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			log.Printf("Error converting projectID to uint: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
+			return
+		}
+
 		userID := c.Param("userId")
 
 		claims, err := getUserClaimsFromCookie(c)
