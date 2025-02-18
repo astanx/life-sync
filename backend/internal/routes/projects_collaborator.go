@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// AddCollaborator добавляет пользователя в коллабораторы проекта
 func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID := c.Param("id")
@@ -48,13 +47,13 @@ func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		for _, id := range project.CollaboratorUserIDs {
-			if id == payload.UserID {
+			if uint(id) == payload.UserID {
 				c.JSON(http.StatusConflict, gin.H{"error": "User is already a collaborator"})
 				return
 			}
 		}
 
-		project.CollaboratorUserIDs = append(project.CollaboratorUserIDs, payload.UserID)
+		project.CollaboratorUserIDs = append(project.CollaboratorUserIDs, int8(payload.UserID))
 		if err := db.Save(&project).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -93,9 +92,9 @@ func RemoveCollaborator(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		newCollaborators := make([]uint, 0)
+		newCollaborators := make([]int8, 0)
 		for _, id := range project.CollaboratorUserIDs {
-			if id != uint(collaboratorID) {
+			if id != int8(collaboratorID) {
 				newCollaborators = append(newCollaborators, id)
 			}
 		}

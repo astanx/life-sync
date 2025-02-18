@@ -11,7 +11,7 @@ type Project struct {
 	Title               string `gorm:"not null"`
 	Userid              uint   `gorm:"not null"`
 	LastOpened          time.Time
-	CollaboratorUserIDs []uint  `gorm:"type:integer[]"`
+	CollaboratorUserIDs []int8  `gorm:"type:integer[]"`
 	Stages              []Stage `gorm:"foreignKey:ProjectID"`
 }
 
