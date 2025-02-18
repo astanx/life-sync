@@ -77,7 +77,7 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var project models.Project
-		result := db.First(&project, "id = ? AND userid = ?", uint(projectID), uint(userID))
+		result := db.First(&project, "id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))", uint(projectID), uint(userID), uint(userID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Project not found or access denied"})
 			return
@@ -157,7 +157,7 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var project models.Project
-		result := db.First(&project, "id = ? AND userid = ?", uint(projectID), uint(userID))
+		result := db.First(&project, "id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))", uint(projectID), uint(userID), uint(userID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Project not found or access denied"})
 			return
@@ -214,7 +214,7 @@ func GetProjectStages(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var project models.Project
-		result := db.First(&project, "id = ? AND userid = ?", projectID, uint(userID))
+		result := db.First(&project, "id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))", projectID, uint(userID), uint(userID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Project not found or access denied"})
 			return
@@ -271,7 +271,7 @@ func DeleteProjectStage(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var project models.Project
-		result := db.First(&project, "id = ? AND userid = ?", projectID, uint(userID))
+		result := db.First(&project, "id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))", projectID, uint(userID), uint(userID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Project not found or access denied"})
 			return
