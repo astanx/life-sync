@@ -66,13 +66,26 @@ func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 				return
 			}
 		}
+
 		project.CollaboratorUserIDs = append(project.CollaboratorUserIDs, int64(payload.UserID))
 		if err := db.Save(&project).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Collaborator added successfully"})
+		var chat models.Chat
+		if err := db.First(&chat, "project_id = ?", project.ID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find associated chat"})
+			return
+		}
+
+		chat.CollaboratorUserIDs = append(chat.CollaboratorUserIDs, int64(payload.UserID))
+		if err := db.Save(&chat).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add collaborator to chat"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Collaborator added successfully to project and chat"})
 	}
 }
 
@@ -136,6 +149,25 @@ func RemoveCollaborator(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Collaborator removed successfully"})
+		var chat models.Chat
+		if err := db.First(&chat, "project_id = ?", project.ID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find associated chat"})
+			return
+		}
+
+		newChatCollaborators := make(pq.Int64Array, 0)
+		for _, id := range chat.CollaboratorUserIDs {
+			if id != collaboratorID {
+				newChatCollaborators = append(newChatCollaborators, id)
+			}
+		}
+
+		chat.CollaboratorUserIDs = newChatCollaborators
+		if err := db.Save(&chat).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove collaborator from chat"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Collaborator removed successfully from project and chat"})
 	}
 }
