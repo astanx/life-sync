@@ -56,7 +56,18 @@ func CreateProject(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		response := CalendarResponse{
+		newChat := models.Chat{
+			Title:     payload.Title + " chat",
+			ProjectID: newProject.ID,
+			CreatorID: uint(userID),
+		}
+
+		if err := db.Create(&newChat).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create chat for the project"})
+			return
+		}
+
+		response := ProjectResponse{
 			ID:    newProject.ID,
 			Title: newProject.Title,
 		}
@@ -67,7 +78,6 @@ func CreateProject(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		var payload struct {
 			ProjectID uint   `json:"id"`
 			Title     string `json:"title"`
@@ -96,15 +106,29 @@ func UpdateProject(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var updatedProject models.Project
-		result := db.First(&updatedProject, "id = ? AND userid = ?", payload.ProjectID, userID)
+		result := db.First(&updatedProject, "id = ? AND userid = ?", payload.ProjectID, uint(userID))
 		if result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "No project with that ID exists"})
 			return
 		}
 
 		updatedProject.Title = payload.Title
+		if err := db.Save(&updatedProject).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project"})
+			return
+		}
 
-		db.Save(&updatedProject)
+		var chat models.Chat
+		if err := db.First(&chat, "project_id = ?", updatedProject.ID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find associated chat"})
+			return
+		}
+
+		chat.Title = updatedProject.Title + " chat"
+		if err := db.Save(&chat).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update chat title"})
+			return
+		}
 
 		response := ProjectResponse{
 			ID:    updatedProject.ID,
@@ -114,7 +138,6 @@ func UpdateProject(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"project": response})
 	}
 }
-
 func GetProjects(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, err := getUserClaimsFromCookie(c)
@@ -164,14 +187,12 @@ func DeleteProject(db *gorm.DB) gin.HandlerFunc {
 
 		claims, err := getUserClaimsFromCookie(c)
 		if err != nil {
-			log.Printf("Error getting user claims: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
 		userID, ok := claims["userid"].(float64)
 		if !ok {
-			log.Printf("Invalid userID in claims: %v", claims)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "userid not found in token claims"})
 			return
 		}
@@ -179,23 +200,26 @@ func DeleteProject(db *gorm.DB) gin.HandlerFunc {
 		var project models.Project
 		result := db.First(&project, "id = ? AND userid = ?", uint(projectID), uint(userID))
 		if result.Error != nil {
-			log.Printf("Error finding calendar: %v", result.Error)
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Calendar not found or access denied"})
+				c.JSON(http.StatusNotFound, gin.H{"error": "Project not found or access denied"})
 			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 			}
 			return
 		}
 
+		if err := db.Where("project_id = ?", project.ID).Delete(&models.Chat{}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete project chat"})
+			return
+		}
+
 		result = db.Delete(&project)
 		if result.Error != nil {
-			log.Printf("Error deleting project: %v", result.Error)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})
+		c.JSON(http.StatusOK, gin.H{"message": "Project and associated chat deleted successfully"})
 	}
 }
 
