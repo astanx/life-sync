@@ -151,7 +151,7 @@ func GetChats(db *gorm.DB) gin.HandlerFunc {
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{"chats": response})
+		c.JSON(http.StatusOK, gin.H{"chat": response})
 	}
 }
 
