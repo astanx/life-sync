@@ -1,15 +1,23 @@
+import { useMessagesStore } from "@/features/main/chats/chat/model";
 import classes from "./SendMessage.module.css";
 import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
 
 interface Form {
   message: string;
 }
 
 const SendMessage = () => {
-  const { register, handleSubmit, reset } = useForm<Form>();
+  const { register, handleSubmit, reset, watch } = useForm<Form>();
+  const message = watch("message", "");
+  const sendMessage = useMessagesStore((state) => state.sendMessage);
+  const { chatId } = useParams();
 
   const submit = (data: Form) => {
-    reset();
+    if (chatId) {
+      sendMessage(chatId, data.message);
+      reset();
+    }
   };
   return (
     <form className={classes.input_container} onSubmit={handleSubmit(submit)}>
@@ -20,7 +28,7 @@ const SendMessage = () => {
         autoComplete="off"
         {...register("message", { required: true })}
       />
-      <button className={classes.send_button}>
+      <button className={classes.send_button} disabled={!message.trim()}>
         <svg
           width="20"
           height="20"

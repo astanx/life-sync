@@ -1,16 +1,15 @@
 import { useEffect, useRef } from "react";
 import classes from "./Chat.module.css";
 import { SendMessage } from "@/features/main/chats/send_message";
+import { useMessagesStore } from "@/features/main/chats/chat/model";
+import { useParams } from "react-router-dom";
+import { formatDateTime } from "@/shared/utils";
 
 const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messages = [
-    {
-      sender: "You",
-      text: "Hello",
-      time: new Date().toLocaleTimeString(),
-    },
-  ];
+  const messages = useMessagesStore((state) => state.messages);
+  const getMessages = useMessagesStore((state) => state.getMessages);
+  const { chatId } = useParams();
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -18,20 +17,29 @@ const Chat = () => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (chatId) {
+      const fetchData = async () => {        
+        await getMessages(chatId);
+      };
+      fetchData();
+    }
+  }, [chatId, getMessages]);
 
   return (
     <div className={classes.chat}>
-      <div className={classes.messages}>
-        {messages.map((message, index) => (
-          <div key={index} className={classes.message}>
-            <div className={classes.message_sender}>{message.sender}</div>
-            <div className={classes.message_text}>{message.text}</div>
-            <div className={classes.message_time}>{message.time}</div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-
+      {messages && (
+        <div className={classes.messages}>
+          {messages.map((message, index) => (
+            <div key={index} className={classes.message}>
+              <div className={classes.message_sender}>{message.sender}</div>
+              <div className={classes.message_text}>{message.content}</div>
+              <div className={classes.message_time}>{formatDateTime(message.created_at)}</div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      )}
       <SendMessage />
     </div>
   );
