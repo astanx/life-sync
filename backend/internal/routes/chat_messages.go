@@ -16,6 +16,7 @@ type MessageResponse struct {
 	ChatID    uint      `json:"chat_id"`
 	UserID    uint      `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
+	Sender    string    `json:"sender"`
 }
 
 func CreateMessage(db *gorm.DB) gin.HandlerFunc {
@@ -55,10 +56,17 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		email, ok := claims["email"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "email not found in token claims"})
+			return
+		}
+
 		newMessage := models.Message{
 			Content: payload.Content,
 			ChatID:  uint(chatID),
 			UserID:  uint(userID),
+			Sender:  email,
 		}
 
 		if err := db.Create(&newMessage).Error; err != nil {
@@ -72,6 +80,7 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 			ChatID:    newMessage.ChatID,
 			UserID:    newMessage.UserID,
 			CreatedAt: newMessage.CreatedAt,
+			Sender:    newMessage.Sender,
 		}
 
 		c.JSON(http.StatusCreated, gin.H{"message": response})
@@ -120,6 +129,7 @@ func GetMessages(db *gorm.DB) gin.HandlerFunc {
 				ChatID:    msg.ChatID,
 				UserID:    msg.UserID,
 				CreatedAt: msg.CreatedAt,
+				Sender:    msg.Sender,
 			})
 		}
 
@@ -175,6 +185,7 @@ func UpdateMessage(db *gorm.DB) gin.HandlerFunc {
 			ChatID:    message.ChatID,
 			UserID:    message.UserID,
 			CreatedAt: message.CreatedAt,
+			Sender:    message.Sender,
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": response})

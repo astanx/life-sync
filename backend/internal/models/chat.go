@@ -18,4 +18,5 @@ type Message struct {
 	Content string `gorm:"type:text; not null"`
 	ChatID  uint   `gorm:"not null"`
 	UserID  uint   `gorm:"not null"`
+	Sender  string `gorm:"type:text; not null"`
 }
