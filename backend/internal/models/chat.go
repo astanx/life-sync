@@ -12,3 +12,10 @@ type Chat struct {
 	CreatorID           uint          `gorm:"not null"`
 	CollaboratorUserIDs pq.Int64Array `gorm:"type:integer[]"`
 }
+
+type Message struct {
+	gorm.Model
+	Content string `gorm:"type:text; not null"`
+	ChatID  uint   `gorm:"not null"`
+	UserID  uint   `gorm:"not null"`
+}

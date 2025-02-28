@@ -69,6 +69,13 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		chatRoutes.DELETE("/:id", DeleteChat(db))
 	}
 
+	{
+		chatRoutes.GET("/:id/messages", GetMessages(db))
+		chatRoutes.POST("/:id/messages", CreateMessage(db))
+		chatRoutes.PUT("/messages/:id", UpdateMessage(db))
+		chatRoutes.DELETE("/messages/:id", DeleteMessage(db))
+	}
+
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Welcome to lifeSync API"})
 	})
