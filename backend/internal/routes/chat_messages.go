@@ -123,7 +123,7 @@ func GetMessages(db *gorm.DB) gin.HandlerFunc {
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{"messages": response})
+		c.JSON(http.StatusOK, gin.H{"message": response})
 	}
 }
 
