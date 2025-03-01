@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import classes from "./Accordion.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
+
 
 interface AccordionItem {
   title: string;
@@ -13,14 +14,12 @@ interface AccordionItem {
 interface Props {
   items: AccordionItem[];
   light?: boolean;
+  activeId: number;
   onClick?: (itemId: number) => void;
 }
 
-const Accordion: React.FC<Props> = ({ items, light, onClick }) => {
-  const [activeId, setActiveId] = useState<number | null>(null);
-
+const Accordion: React.FC<Props> = ({ items, light, activeId, onClick }) => {
   const handleClick = (itemId: number) => {
-    setActiveId(activeId === itemId ? null : itemId);
     if (onClick) {
       onClick(itemId);
     }
@@ -50,11 +49,12 @@ const Accordion: React.FC<Props> = ({ items, light, onClick }) => {
               }`}
             ></span>
           </div>
-          {activeId === item.id && light && (
-            <div className={classes.accordion_content}>
-              <div>{item.content}</div>
-            </div>
-          )}
+          {
+            (activeId === item.id && light && (
+              <div className={classes.accordion_content}>
+                <div>{item.content}</div>
+              </div>
+            ))}
         </div>
       ))}
     </div>

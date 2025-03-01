@@ -9,7 +9,7 @@ import classes from "./PagesAccordion.module.css";
 import { AddButton } from "@/shared/ui/add_button";
 import { CalendarContent } from "@/features/main/calendars/calendar_content/ui";
 import { ProjectsContent } from "@/features/main/projects/projects_content/ui";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { ChatsContent } from "@/features/main/chats/chats_content/ui";
 
 interface Props {
@@ -24,7 +24,12 @@ const PagesAccordion: FC<Props> = ({ closeMenu }) => {
       icon: faHome,
       id: 1,
     },
-    { title: "Chats", content: <ChatsContent closeMenu={closeMenu} />, icon: faMessage, id: 2 },
+    {
+      title: "Chats",
+      content: <ChatsContent closeMenu={closeMenu} />,
+      icon: faMessage,
+      id: 2,
+    },
     {
       title: "Tasks",
       content: <AddButton title="Add new task" />,
@@ -38,9 +43,20 @@ const PagesAccordion: FC<Props> = ({ closeMenu }) => {
       id: 4,
     },
   ];
+  const [activeId, setActiveId] = useState(0);
+  const handleClick = (id: number) => {
+    if (id === activeId) {
+      setActiveId(0);
+    } else setActiveId(id);
+  };
   return (
     <div className={classes.accordion_container}>
-      <Accordion items={accordionItems} light />
+      <Accordion
+        items={accordionItems}
+        light
+        activeId={activeId}
+        onClick={handleClick}
+      />
     </div>
   );
 };
