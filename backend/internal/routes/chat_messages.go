@@ -2,6 +2,7 @@ package routes
 
 import (
 	"lifeSync/internal/models"
+	"lifeSync/internal/ws"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,7 +20,7 @@ type MessageResponse struct {
 	Sender    string    `json:"sender"`
 }
 
-func CreateMessage(db *gorm.DB) gin.HandlerFunc {
+func CreateMessage(db *gorm.DB, hub *ws.Hub) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		chatIDStr := c.Param("id")
 		chatID, err := strconv.ParseUint(chatIDStr, 10, 64)
@@ -73,6 +74,8 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		hub.Broadcast <- newMessage
 
 		response := MessageResponse{
 			ID:        newMessage.ID,
