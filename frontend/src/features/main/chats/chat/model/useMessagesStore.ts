@@ -15,6 +15,7 @@ interface Store {
   messages: Message[];
   getMessages: (chatId: string) => Promise<void>;
   sendMessage: (chatId: string, content: string) => Promise<void>;
+  addMessage: (message: Message) => void;
 }
 
 const useMessagesStore = create<Store>()(
@@ -27,21 +28,24 @@ const useMessagesStore = create<Store>()(
           console.error(response.data.error);
           return;
         }
-        set(() => ({ messages: response.data.message || [] }));
+        set({ messages: response.data.message || [] });
       },
       sendMessage: async (chatId: string, content: string) => {
         const response = await messagesAPI.createMessage(chatId, content);
         if (response.data.error) {
           console.error(response.data.error);
-          return;
         }
-
-        set((state) => ({
-          messages: [...state.messages, response.data.message],
-        }));
+        // Сообщение добавится через WebSocket
+      },
+      addMessage: (message: Message) => {
+        set((state) => {
+          if (state.messages.some(m => m.id === message.id)) {
+            return state;
+          }
+          return { messages: [...state.messages, message] };
+        });
       },
     }),
-
     {
       name: "messages-storage",
       storage: createJSONStorage(() => sessionStorage),
