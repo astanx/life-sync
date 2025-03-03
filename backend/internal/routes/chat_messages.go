@@ -2,12 +2,13 @@ package routes
 
 import (
 	"lifeSync/internal/models"
-	"lifeSync/internal/ws"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +21,73 @@ type MessageResponse struct {
 	Sender    string    `json:"sender"`
 }
 
-func CreateMessage(db *gorm.DB, hub *ws.Hub) gin.HandlerFunc {
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+var (
+	clients      = make(map[uint]map[*websocket.Conn]bool)
+	clientsMutex sync.RWMutex
+)
+
+func WebSocketHandler(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		chatIDStr := c.Param("id")
+		chatID, err := strconv.ParseUint(chatIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chat ID"})
+			return
+		}
+
+		claims, err := getUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+			return
+		}
+
+		var chat models.Chat
+		if err := db.Where("id = ? AND (creator_id = ? OR ? = ANY(collaborator_user_ids))",
+			chatID, uint(userID), uint(userID)).First(&chat).Error; err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
+		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+		if err != nil {
+			return
+		}
+		defer conn.Close()
+
+		clientsMutex.Lock()
+		if clients[uint(chatID)] == nil {
+			clients[uint(chatID)] = make(map[*websocket.Conn]bool)
+		}
+		clients[uint(chatID)][conn] = true
+		clientsMutex.Unlock()
+
+		defer func() {
+			clientsMutex.Lock()
+			delete(clients[uint(chatID)], conn)
+			clientsMutex.Unlock()
+		}()
+
+		for {
+			if _, _, err := conn.ReadMessage(); err != nil {
+				break
+			}
+		}
+	}
+}
+
+func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		chatIDStr := c.Param("id")
 		chatID, err := strconv.ParseUint(chatIDStr, 10, 64)
@@ -75,8 +142,6 @@ func CreateMessage(db *gorm.DB, hub *ws.Hub) gin.HandlerFunc {
 			return
 		}
 
-		hub.Broadcast <- newMessage
-
 		response := MessageResponse{
 			ID:        newMessage.ID,
 			Content:   newMessage.Content,
@@ -85,6 +150,17 @@ func CreateMessage(db *gorm.DB, hub *ws.Hub) gin.HandlerFunc {
 			CreatedAt: newMessage.CreatedAt,
 			Sender:    newMessage.Sender,
 		}
+
+		// Рассылка через WebSocket
+		clientsMutex.RLock()
+		chatClients := clients[newMessage.ChatID]
+		for client := range chatClients {
+			if err := client.WriteJSON(response); err != nil {
+				client.Close()
+				delete(chatClients, client)
+			}
+		}
+		clientsMutex.RUnlock()
 
 		c.JSON(http.StatusCreated, gin.H{"message": response})
 	}

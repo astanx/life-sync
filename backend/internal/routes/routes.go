@@ -10,7 +10,6 @@ import (
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	apiRoutes := r.Group("/api")
 	userRoutes := apiRoutes.Group("/user")
-	InitWebSocket()
 	{
 		userRoutes.POST("", RegisterUser(db))
 		userRoutes.POST("/login", LoginUser(db))
@@ -72,9 +71,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
 	{
 		chatRoutes.GET("/:id/messages", GetMessages(db))
-		chatRoutes.POST("/:id/messages", CreateMessage(db, GetHub()))
+		chatRoutes.POST("/:id/messages", CreateMessage(db))
 		chatRoutes.PUT("/messages/:id", UpdateMessage(db))
 		chatRoutes.DELETE("/messages/:id", DeleteMessage(db))
+		chatRoutes.GET("/:id/ws", WebSocketHandler(db))
 	}
 
 	r.GET("/", func(c *gin.Context) {
