@@ -35,7 +35,6 @@ const useMessagesStore = create<Store>()(
         if (response.data.error) {
           console.error(response.data.error);
         }
-        // Сообщение добавится через WebSocket
       },
       addMessage: (message: Message) => {
         set((state) => {

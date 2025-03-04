@@ -10,6 +10,7 @@ const Chat = () => {
   const ws = useRef<WebSocket | null>(null);
   const messages = useMessagesStore((state) => state.messages);
   const getMessages = useMessagesStore((state) => state.getMessages);
+  const addMessage = useMessagesStore((state) => state.addMessage);
   const { chatId } = useParams();
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const Chat = () => {
     ws.current.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
-        useMessagesStore.getState().addMessage(message);
+        addMessage(message);
       } catch (error) {
         console.error("Error parsing message:", error);
       }
