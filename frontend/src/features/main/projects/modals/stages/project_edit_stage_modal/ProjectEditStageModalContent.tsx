@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -20,38 +20,27 @@ interface FormData {
 }
 
 const ProjectEditStageModalContent: FC<Props> = ({ onClose, stage }) => {
-  const { register, handleSubmit, reset } = useForm<FormData>({
-    mode: "onChange",
+  const { register, handleSubmit } = useForm<FormData>({
     defaultValues: {
       title: stage.title,
-      start: stage.start,
-      end: stage.end,
+      start: stage.start.slice(0, 16),
+      end: stage.end.slice(0, 16),
     },
   });
 
   const { projectId } = useParams();
   const updateStage = useStagesStore((state) => state.updateStage);
 
-  useEffect(() => {
-    reset({
-      title: stage.title,
-      start: stage.start,
-      end: stage.end,
-    });
-  }, [stage, reset]);
-
   const submit = (data: FormData) => {
     try {
       if (projectId) {
-        updateStage(
-          {
-            id: stage.id,
-            title: data.title,
-            start: data.start,
-            end: data.end,
-          },
-          projectId
-        );
+        const payload = {
+          id: stage.id,
+          title: data.title,
+          start: `${data.start}:00Z`,
+          end: `${data.end}:00Z`,
+        };
+        updateStage(payload, projectId);
         toast.success("Stage updated successfully!");
         onClose();
       }

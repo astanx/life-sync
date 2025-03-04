@@ -11,6 +11,7 @@
 .messages {
   flex: 1;
   overflow-y: auto;
+  max-height: 540px;
   margin-bottom: 16px;
   padding: 8px;
   background-color: white;

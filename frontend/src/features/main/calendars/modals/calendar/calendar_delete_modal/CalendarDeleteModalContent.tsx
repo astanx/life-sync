@@ -22,7 +22,7 @@ const CalendarDeleteModalContent: FC<Props> = ({ onClose }) => {
         deleteCalendar(calendarId);
         toast.success("Calendar deleted successfully!");
         onClose();
-        navigate("/dashboard/calendar");
+        navigate("/dashboard");
       }
     } catch (error) {
       toast.error("Failed to delete calendar");

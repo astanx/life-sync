@@ -98,117 +98,133 @@ const StagesTable = () => {
     return result;
   };
 
-  if (stages){
+  if (stages) {
     const allMonths = getAllMonths();
-    const monthGroups = chunkArray(allMonths, 3);  
-  
+    const monthGroups = chunkArray(allMonths, 3);
 
-  const isStageInGroup = (stage: Stage, groupMonths: MonthData[]): boolean => {
-    const stageStart = parseISO(stage.start);
-    const stageEnd = parseISO(stage.end);
-    return groupMonths.some((month) => {
-      const monthStart = startOfMonth(month.date);
-      const monthEnd = endOfMonth(month.date);
-      return (
-        isWithinInterval(monthStart, { start: stageStart, end: stageEnd }) ||
-        isWithinInterval(monthEnd, { start: stageStart, end: stageEnd }) ||
-        (isBefore(monthStart, stageStart) && isAfter(monthEnd, stageEnd))
-      );
-    });
-  };
-
-  return (
-    <>
-
-      {monthGroups.map((group, groupIndex) => {
-        const filteredStages = stages.filter((stage) =>
-          isStageInGroup(stage, group)
-        );
-
+    const isStageInGroup = (
+      stage: Stage,
+      groupMonths: MonthData[]
+    ): boolean => {
+      const stageStart = parseISO(stage.start);
+      const stageEnd = parseISO(stage.end);
+      return groupMonths.some((month) => {
+        const monthStart = startOfMonth(month.date);
+        const monthEnd = endOfMonth(month.date);
         return (
-          <div key={groupIndex} className={classes.tableWrapper}>
-            <table className={classes.table}>
-              <thead>
-                <tr>
-                  <th className={classes.header}></th>
-                  {group.map((month, index) => (
-                    <th
-                      key={index}
-                      colSpan={month.weeks.length}
-                      className={classes.header}
-                    >
-                      {month.name}
-                    </th>
-                  ))}
-                </tr>
-                <tr>
-                  <th className={classes.stages}>Stages</th>
-                  {group.map((month, index) => (
-                    <Fragment key={index}>
-                      {month.weeks.map((week, weekIndex) => (
-                        <th
-                          key={`${index}-${weekIndex}`}
-                          className={classes.subtitle}
-                        >
-                          {getWeek(week, { weekStartsOn: 1 })}W
-                        </th>
-                      ))}
-                    </Fragment>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStages.map((stage) => (
-                  <tr key={stage.id}>
-                    <td className={classes.cell}>{stage.title}</td>
-                    {group.map((month, monthIndex) => (
-                      <Fragment key={`${stage.id}-${monthIndex}`}>
-                        {month.weeks.map((week, weekIndex) => {
-                          const weekStart = startOfWeek(week, {
-                            weekStartsOn: 1,
-                          });
-                          const weekEnd = endOfWeek(week, { weekStartsOn: 1 });
-                          return (
-                            <td
-                              key={`${stage.id}-${monthIndex}-${weekIndex}`}
-                              className={classes.cell}
-                            >
-                              {isWeekInStage(weekStart, weekEnd, stage) && (
-                                <div
-                                  className={classes.stageBlock}
-                                  onClick={() => setSelectedStage(stage)}
-                                />
-                              )}
-                            </td>
-                          );
-                        })}
+          isWithinInterval(monthStart, { start: stageStart, end: stageEnd }) ||
+          isWithinInterval(monthEnd, { start: stageStart, end: stageEnd }) ||
+          (isBefore(monthStart, stageStart) && isAfter(monthEnd, stageEnd))
+        );
+      });
+    };
+
+    const handleStageClick = (stage: Stage) => {
+      setSelectedStage(stage);
+      setIsOpenModalTabs(true);
+    };
+
+    return (
+      <>
+        {monthGroups.map((group, groupIndex) => {
+          const filteredStages = stages.filter((stage) =>
+            isStageInGroup(stage, group)
+          );
+
+          return (
+            <div key={groupIndex} className={classes.tableWrapper}>
+              <table className={classes.table}>
+                <thead>
+                  <tr>
+                    <th className={classes.header}></th>
+                    {group.map((month, index) => (
+                      <th
+                        key={index}
+                        colSpan={month.weeks.length}
+                        className={classes.header}
+                      >
+                        {month.name}
+                      </th>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th className={classes.stages}>Stages</th>
+                    {group.map((month, index) => (
+                      <Fragment key={index}>
+                        {month.weeks.map((week, weekIndex) => (
+                          <th
+                            key={`${index}-${weekIndex}`}
+                            className={classes.subtitle}
+                          >
+                            {getWeek(week, { weekStartsOn: 1 })}W
+                          </th>
+                        ))}
                       </Fragment>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        );
-      })}
+                </thead>
+                <tbody>
+                  {filteredStages.map((stage) => (
+                    <tr key={stage.id}>
+                      <td
+                        className={classes.cell}
+                        onClick={() => {
+                          handleStageClick(stage);
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {stage.title}
+                      </td>
+                      {group.map((month, monthIndex) => (
+                        <Fragment key={`${stage.id}-${monthIndex}`}>
+                          {month.weeks.map((week, weekIndex) => {
+                            const weekStart = startOfWeek(week, {
+                              weekStartsOn: 1,
+                            });
+                            const weekEnd = endOfWeek(week, {
+                              weekStartsOn: 1,
+                            });
+                            return (
+                              <td
+                                key={`${stage.id}-${monthIndex}-${weekIndex}`}
+                                className={classes.cell}
+                              >
+                                {isWeekInStage(weekStart, weekEnd, stage) && (
+                                  <div
+                                    className={classes.stageBlock}
+                                    onClick={() => {
+                                      handleStageClick(stage);
+                                    }}
+                                  />
+                                )}
+                              </td>
+                            );
+                          })}
+                        </Fragment>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
 
-      {isOpenModalCreate && (
         <ProjectCreateStageModal
           isOpen={isOpenModalCreate}
           onClose={onCloseModalCreate}
         />
-      )}
 
-      {selectedStage && (
-        <ProjectStagesTabsModal
-          isOpen={isOpenModalTabs}
-          stage={selectedStage}
-          onClose={onCloseModalTabs}
-        />
-      )}
-    </>
-  );
-}
+        {selectedStage && (
+          <ProjectStagesTabsModal
+            isOpen={isOpenModalTabs}
+            stage={selectedStage}
+            onClose={onCloseModalTabs}
+          />
+        )}
+      </>
+    );
+  }
 };
 
 export { StagesTable };

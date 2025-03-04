@@ -16,13 +16,13 @@ const ProjectDeleteModalContent: FC<Props> = ({ onClose }) => {
   const deleteProject = useProjectsStore((state) => state.deleteProject);
   const navigate = useNavigate();
 
-  const submit = () => {
+  const submit = async () => {
     try {
       if (projectId) {
-        deleteProject(projectId);
+        navigate("/dashboard");
+        await deleteProject(projectId);
         toast.success("Project deleted successfully!");
         onClose();
-        navigate("/dashboard");
       }
     } catch (error) {
       toast.error("Failed to delete project");

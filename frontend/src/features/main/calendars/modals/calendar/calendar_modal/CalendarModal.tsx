@@ -27,7 +27,7 @@ const CalendarModal: FC<Props> = ({ isOpen, onClose }) => {
         toast.success("Calendar created successfully!");
         onClose();
         reset();
-        navigate(`${calendarId}`);
+        navigate(`calendar/${calendarId}`);
       }
     } catch (error) {
       toast.error("Failed to create calendar");

@@ -53,7 +53,7 @@ const useStagesStore = create<Store>()(
 
         set((state) => ({
           stages: state.stages.filter(
-            (stage) => stage.id !== response.data.stage.id
+            (stage) => stage.id !== +stageId
           ),
         }));
       },
