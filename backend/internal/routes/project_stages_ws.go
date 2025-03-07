@@ -51,7 +51,7 @@ func StageWebSocketHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		conn, err := websocket.Upgrade(c.Writer, c.Request, nil, 1024, 1024)
+		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
 			log.Println("WebSocket upgrade error:", err)
 			return
