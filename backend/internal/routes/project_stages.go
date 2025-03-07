@@ -116,10 +116,10 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			StageID uint      `json:"id"`
-			Title   string    `json:"title"`
-			Start   time.Time `json:"start" binding:"required" time_format:"2006-01-02"`
-			End     time.Time `json:"end" binding:"required" time_format:"2006-01-02"`
+			StageID uint   `json:"id"`
+			Title   string `json:"title"`
+			Start   string `json:"start" binding:"required"`
+			End     string `json:"end" binding:"required"`
 		}
 
 		projectIDStr := c.Param("projectid")
