@@ -104,6 +104,11 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			End:   newStage.End,
 		}
 
+		go notifyStageClients(uint(projectID), StageWSResponse{
+			Action: "create",
+			Stage:  response,
+		})
+
 		c.JSON(http.StatusCreated, gin.H{"stage": response})
 	}
 }
@@ -182,6 +187,11 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			Start: updatedStage.Start,
 			End:   updatedStage.End,
 		}
+
+		go notifyStageClients(uint(projectID), StageWSResponse{
+			Action: "update",
+			Stage:  response,
+		})
 
 		c.JSON(http.StatusOK, gin.H{"stage": response})
 	}

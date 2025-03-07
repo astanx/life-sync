@@ -52,6 +52,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		projectStagesRoutes.POST("", CreateProjectStage(db))
 		projectStagesRoutes.PUT("", UpdateProjectStage(db))
 		projectStagesRoutes.DELETE("/:id", DeleteProjectStage(db))
+		projectStagesRoutes.GET("/ws", StageWebSocketHandler(db))
 	}
 
 	projectCollaboratorRoutes := projectRoutes.Group("/:id/collaborators")
