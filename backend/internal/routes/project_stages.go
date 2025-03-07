@@ -62,6 +62,7 @@ func ProjectWebSocketHandler(db *gorm.DB) gin.HandlerFunc {
 
 		conn, err := projectUpgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
+			log.Printf("WebSocket upgrade error: %v", err)
 			return
 		}
 		defer conn.Close()
@@ -387,11 +388,25 @@ func DeleteProjectStage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		result = db.Delete(&stage)
-		if result.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		if err := db.Delete(&stage).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		response := StageResponse{
+			ID:   stage.ID,
+			Type: "delete",
+		}
+
+		projectClientsMutex.RLock()
+		projectWsClients := projectClients[uint(projectID)]
+		for client := range projectWsClients {
+			if err := client.WriteJSON(response); err != nil {
+				client.Close()
+				delete(projectWsClients, client)
+			}
+		}
+		projectClientsMutex.RUnlock()
 
 		c.JSON(http.StatusOK, gin.H{"message": "Stage deleted successfully"})
 	}
