@@ -1,69 +1,74 @@
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
-import { Stage, stagesAPI } from "@/features/main/projects/stages_table/api";
+import { Stage, stagesAPI } from "../api";
 
 interface Store {
   stages: Stage[];
   getStages: (projectId: string) => Promise<void>;
-  createStage: (stage: Stage, projectId: string) => Promise<void>;
+  createStage: (stage: Omit<Stage, "id">, projectId: string) => Promise<void>;
   updateStage: (stage: Stage, projectId: string) => Promise<void>;
   deleteStage: (stageId: string, projectId: string) => Promise<void>;
+  addStage: (stage: Stage) => void;
+  updateStageLocal: (stage: Stage) => void;
+  deleteStageLocal: (stageId: number) => void;
 }
 
-const useStagesStore = create<Store>()(
-  persist(
-    (set) => ({
-      stages: [],
-      getStages: async (projectId: string) => {
-        const response = await stagesAPI.getStages(projectId);
-        if (response.data.error) {
-          console.error(response.data.error);
-          return;
-        }
-        set(() => ({ stages: response.data.stage }));
-      },
-      createStage: async (stage: Stage, projectId: string) => {
-        const response = await stagesAPI.createStage(stage, projectId);
-        if (response.data.error) {
-          console.error(response.data.error);
-          return;
-        }
-        set((state) => ({ stages: [...state.stages, response.data.stage] }));
-      },
-      updateStage: async (stage: Stage, projectId: string) => {
-        const response = await stagesAPI.updateStage(stage, projectId);
-
-        if (response.data.error) {
-          console.error(response.data.error);
-          return;
-        }
-        set((state) => ({
-          stages: state.stages.map((e) =>
-            e.id === response.data.stage.id ? response.data.stage : e
-          ),
-        }));
-      },
-      deleteStage: async (stageId: string, projectId: string) => {
-        const response = await stagesAPI.deleteStage(stageId, projectId);
-
-        if (response.data.error) {
-          console.error(response.data.error);
-          return;
-        }
-
-        set((state) => ({
-          stages: state.stages.filter(
-            (stage) => stage.id !== +stageId
-          ),
-        }));
-      },
-    }),
-
-    {
-      name: "project-stages-storage",
-      storage: createJSONStorage(() => sessionStorage),
+const useStagesStore = create<Store>((set) => ({
+  stages: [],
+  getStages: async (projectId) => {
+    try {
+      const response = await stagesAPI.getStages(projectId);
+      if (!response.data.error) {
+        set({ stages: response.data.stage });
+      }
+    } catch (error) {
+      console.error("Error fetching stages:", error);
     }
-  )
-);
+  },
+
+  createStage: async (stageData, projectId) => {
+    try {
+      await stagesAPI.createStage(stageData, projectId);
+    } catch (error) {
+      console.error("Failed to create stage:", error);
+      throw error;
+    }
+  },
+
+  updateStage: async (stageData, projectId) => {
+    try {
+      await stagesAPI.updateStage(stageData, projectId);
+    } catch (error) {
+      console.error("Failed to update stage:", error);
+      throw error;
+    }
+  },
+
+  deleteStage: async (stageId, projectId) => {
+    try {
+      await stagesAPI.deleteStage(stageId, projectId);
+    } catch (error) {
+      console.error("Failed to delete stage:", error);
+      throw error;
+    }
+  },
+
+  addStage: (stage) => {
+    set((state) => ({ stages: [...state.stages, stage] }));
+  },
+
+  updateStageLocal: (stage) => {
+    set((state) => ({
+      stages: state.stages.map((s) =>
+        s.id === stage.id ? stage : s
+      ),
+    }));
+  },
+
+  deleteStageLocal: (stageId) => {
+    set((state) => ({
+      stages: state.stages.filter((s) => s.id !== stageId),
+    }));
+  },
+}));
 
 export { useStagesStore };

@@ -12,25 +12,26 @@ interface Props {
 }
 
 const ProjectDeleteStageModalContent: FC<Props> = ({ onClose, id }) => {
-  const { handleSubmit } = useForm<FormData>();
-  const { projectId } = useParams();
-  const deleteStage = useStagesStore((state) => state.deleteStage);
-  const submit = () => {
+  const { handleSubmit } = useForm();
+  const { projectId } = useParams<{ projectId: string }>();
+  const { deleteStage } = useStagesStore();
+
+  const submit = async () => {
     try {
-      if (projectId) {
-        deleteStage(id, projectId);
-        toast.success("Stage deleted successfully!");
-        onClose();
-      }
+      if (!projectId) return;
+      await deleteStage(id, projectId);
+      toast.success("Stage deleted successfully!");
+      onClose();
     } catch (error) {
       toast.error("Failed to delete stage");
     }
   };
+
   return (
     <>
       <h2>Are you sure that you want to delete this stage?</h2>
       <form onSubmit={handleSubmit(submit)} className={classes.form}>
-        <Button>Submit</Button>
+        <Button>Confirm Delete</Button>
       </form>
     </>
   );

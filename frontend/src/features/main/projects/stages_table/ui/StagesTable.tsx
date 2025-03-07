@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import classes from "./StagesTable.module.css";
 import {
   format,
@@ -34,14 +34,53 @@ const StagesTable = () => {
   const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
   const [isOpenModalTabs, setIsOpenModalTabs] = useState(false);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
-  const { projectId } = useParams<ProjectParams>();
 
-  const stages = useStagesStore((state) => state.stages);
-  const getStages = useStagesStore((state) => state.getStages);
+  const ws = useRef<WebSocket | null>(null);
+  const { projectId } = useParams<ProjectParams>();
+  const { stages, getStages } = useStagesStore();
 
   useEffect(() => {
-    if (projectId) getStages(projectId);
-  }, [getStages, projectId]);
+    if (!projectId) return;
+
+    getStages(projectId);
+
+    ws.current = new WebSocket(
+      `wss://lifesync-backend.onrender.com/api/project/stages/${projectId}/ws`
+    );
+
+    ws.current.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        const { addStage, updateStageLocal, deleteStageLocal } =
+          useStagesStore.getState();
+        switch (data.type) {
+          case "create":
+            addStage({
+              ...data,
+              start: data.start,
+              end: data.end,
+            });
+            break;
+          case "update":
+            updateStageLocal({
+              ...data,
+              start: data.start,
+              end: data.end,
+            });
+            break;
+          case "delete":
+            deleteStageLocal(data.id);
+            break;
+        }
+      } catch (error) {
+        console.error("Error processing WebSocket message:", error);
+      }
+    };
+
+    return () => {
+      ws.current?.close();
+    };
+  }, [projectId]);
 
   const getAllMonths = (): MonthData[] => {
     const allMonths = new Set<string>();

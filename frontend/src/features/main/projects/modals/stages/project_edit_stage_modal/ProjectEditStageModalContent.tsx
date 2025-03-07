@@ -20,30 +20,32 @@ interface FormData {
 }
 
 const ProjectEditStageModalContent: FC<Props> = ({ onClose, stage }) => {
+  console.log(stage)
   const { register, handleSubmit } = useForm<FormData>({
     defaultValues: {
       title: stage.title,
-      start: stage.start.slice(0, 16),
-      end: stage.end.slice(0, 16),
+      start: stage.start.slice(0, 10),
+      end: stage.end.slice(0, 10),
     },
   });
 
-  const { projectId } = useParams();
-  const updateStage = useStagesStore((state) => state.updateStage);
+  const { projectId } = useParams<{ projectId: string }>();
+  const { updateStage } = useStagesStore();
 
-  const submit = (data: FormData) => {
+  const submit = async (data: FormData) => {
     try {
-      if (projectId) {
-        const payload = {
-          id: stage.id,
-          title: data.title,
-          start: `${data.start}:00Z`,
-          end: `${data.end}:00Z`,
-        };
-        updateStage(payload, projectId);
-        toast.success("Stage updated successfully!");
-        onClose();
-      }
+      if (!projectId) return;
+  
+      const payload = {
+        ...stage,
+        title: data.title,
+        start: data.start,
+        end: data.end,
+      };
+  
+      await updateStage(payload, projectId);
+      toast.success("Stage updated successfully!");
+      onClose();
     } catch (error) {
       toast.error("Failed to update stage");
     }
@@ -61,12 +63,12 @@ const ProjectEditStageModalContent: FC<Props> = ({ onClose, stage }) => {
         />
         <Input
           label="Start Date"
-          type="datetime-local"
+          type="date"
           {...register("start", { required: true })}
         />
         <Input
           label="End Date"
-          type="datetime-local"
+          type="date"
           {...register("end", { required: true })}
         />
 

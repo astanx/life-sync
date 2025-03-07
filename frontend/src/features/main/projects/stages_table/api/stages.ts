@@ -2,15 +2,11 @@ import { stagesIntence } from "./intence";
 import { Stage } from "./types";
 
 const stagesAPI = {
-  createStage: async (stage: Stage, projectId: string) => {
-    console.log(stage);
-    
+  createStage: async (stage: Omit<Stage, "id">, projectId: string) => {
     const response = await stagesIntence.post(
       `/${projectId}`,
       stage
     );
-    console.log(response);
-    
     return response;
   },
   getStages: async (projectId: string) => {

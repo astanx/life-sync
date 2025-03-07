@@ -21,23 +21,25 @@ interface FormData {
 
 const ProjectCreateStageModal: FC<Props> = ({ isOpen, onClose }) => {
   const { register, handleSubmit, reset } = useForm<FormData>();
-  const createStage = useStagesStore((state) => state.createStage);
-  const { projectId } = useParams();
+  const { projectId } = useParams<{ projectId: string }>();
+  const { createStage } = useStagesStore();
 
-  const submit = (data: FormData) => {
+  const submit = async (data: FormData) => {
     try {
-      if (projectId) {
-        const stage = {
+      if (!projectId) return;
+  
+      await createStage(
+        {
           title: data.title,
           start: data.start,
           end: data.end,
-          id: 1,
-        };
-        createStage(stage, projectId);
-        toast.success("Stage created successfully!");
-        onClose();
-        reset();
-      }
+        },
+        projectId
+      );
+  
+      toast.success("Stage created successfully!");
+      onClose();
+      reset();
     } catch (error) {
       toast.error("Failed to create stage");
     }
