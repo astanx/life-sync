@@ -1,7 +1,6 @@
-package routes
+package auth
 
 import (
-	"lifeSync/internal/models"
 	"net/http"
 	"time"
 
@@ -9,6 +8,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+
+	"lifeSync/internal/middleware"
+	"lifeSync/internal/models"
 )
 
 func RegisterUser(db *gorm.DB) gin.HandlerFunc {
@@ -38,7 +40,7 @@ func RegisterUser(db *gorm.DB) gin.HandlerFunc {
 		claims["email"] = user.Email
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-		tokenString, err := token.SignedString(mySigningKey)
+		tokenString, err := token.SignedString(middleware.GetSingingKey())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -91,7 +93,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 		claims["verified"] = false
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-		tokenString, err := token.SignedString([]byte(mySigningKey))
+		tokenString, err := token.SignedString(middleware.GetSingingKey())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -117,7 +119,7 @@ func LoginUser(db *gorm.DB) gin.HandlerFunc {
 
 func LoginFromCookie(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -142,7 +144,7 @@ func LoginFromCookie(db *gorm.DB) gin.HandlerFunc {
 func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -177,7 +179,7 @@ func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return

@@ -3,7 +3,7 @@ package api_tests
 import (
 	"bytes"
 	"encoding/json"
-	"lifeSync/internal/routes"
+	"lifeSync/internal/handlers/auth"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,7 +24,7 @@ func TestRegisterUser(t *testing.T) {
 	mock.ExpectCommit()
 
 	router := gin.Default()
-	router.POST("/register", routes.RegisterUser(db))
+	router.POST("/register", auth.RegisterUser(db))
 
 	registerData := map[string]string{
 		"email":    "test@example.com",

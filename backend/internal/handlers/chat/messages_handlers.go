@@ -1,6 +1,7 @@
-package routes
+package chat
 
 import (
+	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"net/http"
 	"strconv"
@@ -41,7 +42,7 @@ func WebSocketHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
@@ -105,7 +106,7 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -175,7 +176,7 @@ func GetMessages(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -234,7 +235,7 @@ func UpdateMessage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -280,7 +281,7 @@ func DeleteMessage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return

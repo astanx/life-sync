@@ -1,6 +1,7 @@
-package routes
+package project
 
 import (
+	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"log"
 	"net/http"
@@ -41,7 +42,7 @@ func ProjectWebSocketHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
@@ -134,7 +135,7 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		startTime = startTime.UTC()
 		endTime = endTime.UTC()
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -234,7 +235,7 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -305,7 +306,7 @@ func GetProjectStages(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -362,7 +363,7 @@ func DeleteProjectStage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return

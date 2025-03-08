@@ -1,6 +1,7 @@
-package routes
+package calendar
 
 import (
+	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"log"
 	"net/http"
@@ -60,7 +61,7 @@ func CreateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -132,7 +133,7 @@ func UpdateCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -189,7 +190,7 @@ func GetCalendarEvents(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -246,7 +247,7 @@ func DeleteCalendarEvent(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return

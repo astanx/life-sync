@@ -1,6 +1,7 @@
-package routes
+package project
 
 import (
+	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"log"
 	"net/http"
@@ -36,7 +37,7 @@ func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -107,7 +108,7 @@ func RemoveCollaborator(db *gorm.DB) gin.HandlerFunc {
 
 		userID := c.Param("userId")
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return

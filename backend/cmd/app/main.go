@@ -3,7 +3,7 @@ package main
 import (
 	"lifeSync/internal/config"
 	"lifeSync/internal/database"
-	"lifeSync/internal/routes"
+	"lifeSync/routes"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

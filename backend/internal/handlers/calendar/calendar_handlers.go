@@ -1,7 +1,8 @@
-package routes
+package calendar
 
 import (
 	"errors"
+	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"log"
 	"net/http"
@@ -32,7 +33,7 @@ func CreateCalendar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -82,7 +83,7 @@ func UpdateCalendar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -116,7 +117,7 @@ func UpdateCalendar(db *gorm.DB) gin.HandlerFunc {
 
 func GetCalendars(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -161,7 +162,7 @@ func DeleteCalendar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			log.Printf("Error getting user claims: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

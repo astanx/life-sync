@@ -1,9 +1,10 @@
-package routes
+package auth
 
 import (
 	"crypto/rand"
 	"fmt"
 	"lifeSync/internal/config"
+	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"net/http"
 	"net/smtp"
@@ -15,7 +16,7 @@ import (
 )
 
 func SendVerificationCode(c *gin.Context) {
-	claims, err := getUserClaimsFromCookie(c)
+	claims, err := middleware.GetUserClaimsFromCookie(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -40,7 +41,7 @@ func SendVerificationCode(c *gin.Context) {
 
 	claims["code"] = verificationCode
 
-	tokenString, err := createTokenFromClaims(claims)
+	tokenString, err := middleware.CreateTokenFromClaims(claims)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
 		return
@@ -95,7 +96,7 @@ func generateVerificationCode() (string, error) {
 func ValidateCode(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var code models.Code
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "No verification code found"})
 			return
@@ -134,7 +135,7 @@ func ValidateCode(db *gorm.DB) gin.HandlerFunc {
 				tokenClaims[key] = value
 			}
 
-			tokenString, err := token.SignedString(mySigningKey)
+			tokenString, err := token.SignedString(middleware.GetSingingKey())
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 				return

@@ -1,6 +1,7 @@
-package routes
+package chat
 
 import (
+	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"net/http"
 	"strconv"
@@ -32,7 +33,7 @@ func CreateChat(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -88,7 +89,7 @@ func UpdateChat(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -124,7 +125,7 @@ func UpdateChat(db *gorm.DB) gin.HandlerFunc {
 
 func GetChats(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -164,7 +165,7 @@ func DeleteChat(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := getUserClaimsFromCookie(c)
+		claims, err := middleware.GetUserClaimsFromCookie(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return

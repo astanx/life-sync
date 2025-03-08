@@ -3,7 +3,7 @@ package api_tests
 import (
 	"bytes"
 	"encoding/json"
-	"lifeSync/internal/routes"
+	"lifeSync/internal/handlers/auth"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -29,7 +29,7 @@ func TestLoginUser(t *testing.T) {
 		WillReturnRows(rows)
 
 	router := gin.Default()
-	router.POST("/login", routes.LoginUser(db))
+	router.POST("/login", auth.LoginUser(db))
 
 	loginData := map[string]string{
 		"email":    "test@example.com",
@@ -67,7 +67,7 @@ func TestLoginUserInvalidCredentials(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"id", "email", "password"}))
 
 	router := gin.Default()
-	router.POST("/login", routes.LoginUser(db))
+	router.POST("/login", auth.LoginUser(db))
 
 	loginData := map[string]string{
 		"email":    "wrong@example.com",
