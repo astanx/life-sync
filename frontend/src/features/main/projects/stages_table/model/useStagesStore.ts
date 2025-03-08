@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Stage, stagesAPI } from "../api";
+import { Stage, stagesAPI } from "@/features/main/projects/stages_table/api";
 
 interface Store {
   stages: Stage[];

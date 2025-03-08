@@ -4,7 +4,7 @@ import { Modal } from "@/shared/ui/modal";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
 import classes from "./ProjectCreateStageModal.module.css";
-import { useStagesStore } from "../../../stages_table/model";
+import { useStagesStore } from "@/features/main/projects/stages_table/model";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 

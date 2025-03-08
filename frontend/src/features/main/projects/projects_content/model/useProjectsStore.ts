@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { projectsAPI } from "../api";
+import { projectsAPI } from "@/features/main/projects/projects_content/api";
 
 interface Project {
   title: string;

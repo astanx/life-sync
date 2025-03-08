@@ -1,6 +1,6 @@
 import { AddButton } from "@/shared/ui/add_button";
 import { useState } from "react";
-import { ProjectCreateModal } from "../modals/projects/project_create_modal";
+import { ProjectCreateModal } from "@/features/main/projects/modals/projects/project_create_modal";
 
 const AddProjectButton = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);

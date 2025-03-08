@@ -3,7 +3,7 @@ import classes from "./VerificationForm.module.css";
 import { Controller, useForm } from "react-hook-form";
 import { useRef, useState } from "react";
 import { AuthButton } from "@/features/auth/auth_button";
-import { useAuthStore } from "../model";
+import { useAuthStore } from "@/features/auth/model";
 import { useNavigate } from "react-router-dom";
 
 interface Form {

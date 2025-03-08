@@ -1,5 +1,5 @@
 import { Input } from "@/shared/ui/input";
-import { AuthButton } from "../auth_button";
+import { AuthButton } from "@/features/auth/auth_button";
 import classes from "./RegisterForm.module.css";
 import { useForm } from "react-hook-form";
 import { User } from "@/features/auth/api";

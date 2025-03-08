@@ -1,6 +1,6 @@
 import { TabsModal } from "@/shared/ui/tabs_modal";
-import { CalendarEditEventModalContent } from "../calendar_edit_event_modal";
-import { CalendarDeleteEventModalContent } from "../calendar_delete_event_modal";
+import { CalendarEditEventModalContent } from "@/features/main/calendars/modals/events/calendar_edit_event_modal";
+import { CalendarDeleteEventModalContent } from "@/features/main/calendars/modals/events/calendar_delete_event_modal";
 import { FC } from "react";
 import { Event } from "@/features/main/calendars/calendar/api";
 
