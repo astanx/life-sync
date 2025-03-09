@@ -1,6 +1,7 @@
 package project
 
 import (
+	"errors"
 	"lifeSync/internal/middleware"
 	"lifeSync/internal/models"
 	"log"
@@ -449,25 +450,9 @@ func UpdateStagePosition(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		projectIDStr := c.Param("projectid")
-
-		if projectIDStr == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
-			return
-		}
-
 		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
-			return
-		}
-
-		validStatuses := map[string]bool{
-			"todo":        true,
-			"in_progress": true,
-			"done":        true,
-		}
-		if !validStatuses[payload.Status] {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status"})
 			return
 		}
 
@@ -478,25 +463,36 @@ func UpdateStagePosition(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		userID, ok := claims["userid"].(float64)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+		if !ok || userID != float64(uint(userID)) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID format"})
 			return
 		}
+		parsedUserID := uint(userID)
 
 		var stage models.Stage
-		if err := db.Preload("Project").
-			Where("id = ?", payload.StageID).
-			First(&stage).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Stage not found"})
+		if err := db.Where("id = ? AND project_id = ?", payload.StageID, projectID).First(&stage).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Stage not found in project"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			}
 			return
 		}
 
 		var project models.Project
-		err = db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
-			projectID, uint(userID), uint(userID)).
-			First(&project).Error
-		if err != nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		if err := db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectID, parsedUserID, parsedUserID).First(&project).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			}
+			return
+		}
+
+		validStatuses := map[string]bool{"todo": true, "in_progress": true, "done": true}
+		if !validStatuses[payload.Status] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status"})
 			return
 		}
 
@@ -516,13 +512,15 @@ func UpdateStagePosition(db *gorm.DB) gin.HandlerFunc {
 			} else {
 				if stage.Position < payload.Position {
 					if err := tx.Model(&models.Stage{}).
-						Where("status = ? AND position > ? AND position <= ?", payload.Status, stage.Position, payload.Position).
+						Where("status = ? AND position > ? AND position <= ?",
+							payload.Status, stage.Position, payload.Position).
 						Update("position", gorm.Expr("position - 1")).Error; err != nil {
 						return err
 					}
 				} else {
 					if err := tx.Model(&models.Stage{}).
-						Where("status = ? AND position >= ? AND position < ?", payload.Status, payload.Position, stage.Position).
+						Where("status = ? AND position >= ? AND position < ?",
+							payload.Status, payload.Position, stage.Position).
 						Update("position", gorm.Expr("position + 1")).Error; err != nil {
 						return err
 					}
@@ -554,14 +552,15 @@ func UpdateStagePosition(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		projectClientsMutex.RLock()
-		projectWsClients := projectClients[stage.ProjectID]
-		for client := range projectWsClients {
-			if err := client.WriteJSON(response); err != nil {
-				client.Close()
-				delete(projectWsClients, client)
+		defer projectClientsMutex.RUnlock()
+		if clients, ok := projectClients[uint(projectID)]; ok {
+			for client := range clients {
+				if err := client.WriteJSON(response); err != nil {
+					client.Close()
+					delete(clients, client)
+				}
 			}
 		}
-		projectClientsMutex.RUnlock()
 
 		c.JSON(http.StatusOK, gin.H{"stage": response})
 	}
