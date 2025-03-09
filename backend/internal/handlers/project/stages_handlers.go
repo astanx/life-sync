@@ -438,9 +438,9 @@ func DeleteProjectStage(db *gorm.DB) gin.HandlerFunc {
 func UpdateStagePosition(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			StageID  uint   `json:"id" binding:"required"`
-			Status   string `json:"status" binding:"required"`
-			Position int    `json:"position" binding:"required"`
+			StageID  uint   `json:"id"`
+			Status   string `json:"status"`
+			Position int    `json:"position"`
 		}
 
 		if err := c.ShouldBindJSON(&payload); err != nil {
@@ -508,7 +508,6 @@ func UpdateStagePosition(db *gorm.DB) gin.HandlerFunc {
 					return err
 				}
 
-				// Увеличиваем позиции в новом статусе
 				if err := tx.Model(&models.Stage{}).
 					Where("status = ? AND position >= ?", payload.Status, payload.Position).
 					Update("position", gorm.Expr("position + 1")).Error; err != nil {
