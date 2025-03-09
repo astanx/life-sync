@@ -15,11 +15,13 @@ import (
 )
 
 type StageResponse struct {
-	ID    uint      `json:"id"`
-	Title string    `json:"title"`
-	Start time.Time `json:"start"`
-	End   time.Time `json:"end"`
-	Type  string    `json:"type"`
+	ID       uint      `json:"id"`
+	Title    string    `json:"title"`
+	Start    time.Time `json:"start"`
+	End      time.Time `json:"end"`
+	Type     string    `json:"type"`
+	Status   string    `json:"status"`
+	Position int       `json:"position"`
 }
 
 var (
@@ -92,9 +94,11 @@ func ProjectWebSocketHandler(db *gorm.DB) gin.HandlerFunc {
 func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			Title string `json:"title" binding:"required"`
-			Start string `json:"start" binding:"required"`
-			End   string `json:"end" binding:"required"`
+			Title    string `json:"title" binding:"required"`
+			Start    string `json:"start" binding:"required"`
+			End      string `json:"end" binding:"required"`
+			Status   string `json:"status"`
+			Position int    `json:"position"`
 		}
 
 		projectIDStr := c.Param("projectid")
@@ -160,6 +164,8 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			End:       endTime,
 			Userid:    uint(userID),
 			ProjectID: uint(projectID),
+			Status:    "todo",
+			Position:  0,
 		}
 
 		result = db.Create(&newStage)
@@ -216,7 +222,6 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Парсинг дат
 		layout := "2006-01-02"
 		startTime, err := time.Parse(layout, payload.Start)
 		if err != nil {
@@ -410,5 +415,138 @@ func DeleteProjectStage(db *gorm.DB) gin.HandlerFunc {
 		projectClientsMutex.RUnlock()
 
 		c.JSON(http.StatusOK, gin.H{"message": "Stage deleted successfully"})
+	}
+}
+
+func UpdateStagePosition(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var payload struct {
+			StageID  uint   `json:"id" binding:"required"`
+			Status   string `json:"status" binding:"required"`
+			Position int    `json:"position" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&payload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		projectIDStr := c.Param("projectid")
+
+		if projectIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+			return
+		}
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID format"})
+			return
+		}
+
+		validStatuses := map[string]bool{
+			"todo":        true,
+			"in_progress": true,
+			"done":        true,
+		}
+		if !validStatuses[payload.Status] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status"})
+			return
+		}
+
+		claims, err := middleware.GetUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+			return
+		}
+
+		var stage models.Stage
+		if err := db.Preload("Project").
+			Where("id = ?", payload.StageID).
+			First(&stage).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Stage not found"})
+			return
+		}
+
+		var project models.Project
+		err = db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectID, uint(userID), uint(userID)).
+			First(&project).Error
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
+		err = db.Transaction(func(tx *gorm.DB) error {
+			if stage.Status != payload.Status {
+				if err := tx.Model(&models.Stage{}).
+					Where("status = ? AND position > ?", stage.Status, stage.Position).
+					Update("position", gorm.Expr("position - 1")).Error; err != nil {
+					return err
+				}
+
+				// Увеличиваем позиции в новом статусе
+				if err := tx.Model(&models.Stage{}).
+					Where("status = ? AND position >= ?", payload.Status, payload.Position).
+					Update("position", gorm.Expr("position + 1")).Error; err != nil {
+					return err
+				}
+			} else {
+				if stage.Position < payload.Position {
+					if err := tx.Model(&models.Stage{}).
+						Where("status = ? AND position > ? AND position <= ?", payload.Status, stage.Position, payload.Position).
+						Update("position", gorm.Expr("position - 1")).Error; err != nil {
+						return err
+					}
+				} else {
+					if err := tx.Model(&models.Stage{}).
+						Where("status = ? AND position >= ? AND position < ?", payload.Status, payload.Position, stage.Position).
+						Update("position", gorm.Expr("position + 1")).Error; err != nil {
+						return err
+					}
+				}
+			}
+
+			stage.Status = payload.Status
+			stage.Position = payload.Position
+			if err := tx.Save(&stage).Error; err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		response := StageResponse{
+			ID:       stage.ID,
+			Title:    stage.Title,
+			Start:    stage.Start,
+			End:      stage.End,
+			Type:     "update",
+			Status:   stage.Status,
+			Position: stage.Position,
+		}
+
+		projectClientsMutex.RLock()
+		projectWsClients := projectClients[stage.ProjectID]
+		for client := range projectWsClients {
+			if err := client.WriteJSON(response); err != nil {
+				client.Close()
+				delete(projectWsClients, client)
+			}
+		}
+		projectClientsMutex.RUnlock()
+
+		c.JSON(http.StatusOK, gin.H{"stage": response})
 	}
 }

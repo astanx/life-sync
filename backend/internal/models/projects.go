@@ -23,4 +23,6 @@ type Stage struct {
 	End       time.Time `gorm:"not null;type:date"`
 	ProjectID uint      `gorm:"not null"`
 	Userid    uint      `gorm:"not null"`
+	Status    string    `gorm:"not null;default:'todo'"`
+	Position  int       `gorm:"not null;default:0"`
 }
