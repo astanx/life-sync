@@ -20,7 +20,6 @@ interface FormData {
 }
 
 const ProjectEditStageModalContent: FC<Props> = ({ onClose, stage }) => {
-  console.log(stage)
   const { register, handleSubmit } = useForm<FormData>({
     defaultValues: {
       title: stage.title,

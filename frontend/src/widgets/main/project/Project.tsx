@@ -8,11 +8,14 @@ import { useEffect, useState } from "react";
 import { ProjectTabsModal } from "@/features/main/projects/modals/projects/project_tabs_modal";
 import { AddButton } from "@/shared/ui/add_button";
 import { AddCollaboratorModal } from "@/features/main/projects/modals/projects/add_collaborator_modal";
+import { KanbanBoard } from "@/features/main/projects/kanban_board";
 
+type Switches = "calendar" | "kanban";
 const ProjectWidget = () => {
   const getProjectTitle = useProjectsStore((state) => state.getProjectTitle);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenCollaboratorModal, setIsOpenCollaboratorModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<Switches>("kanban");
 
   const { projectId } = useParams();
 
@@ -39,6 +42,10 @@ const ProjectWidget = () => {
     setIsOpenCollaboratorModal(false);
   }
 
+  const handleTabSwitch = (tab: Switches) => {
+    setActiveTab(tab);
+  };
+
   return (
     <>
       <div className={classes.table_container}>
@@ -49,11 +56,11 @@ const ProjectWidget = () => {
               <AddButton title="Add collaborator" onClick={handleOpenCollaboratorModal}/>
             </div>
           </div>
-          <ModeSwitcher />
+          <ModeSwitcher onSwitch={handleTabSwitch} active={activeTab} />
           <AddStageButton />
         </div>
         <div className={classes.table}>
-          <StagesTable />
+          {activeTab === 'calendar' ? <StagesTable /> : <KanbanBoard />}
         </div>
       </div>
       <ProjectTabsModal isOpen={isOpenModal} onClose={handleCloseModal} />

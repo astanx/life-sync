@@ -1,26 +1,30 @@
-import { useState } from "react";
+import { FC } from "react";
 import classes from "./ModeSwitcher.module.css";
 
-type Switches = "calendar" | "stages";
+type Switches = "calendar" | "kanban";
 
-const ModeSwitcher = () => {
-  const [active, setActive] = useState<Switches>("calendar");
+interface Props {
+  active: Switches;
+  onSwitch: (mode: Switches) => void;
+}
 
-  const handleStagesClick = () => {
-    setActive("stages");
+const ModeSwitcher: FC<Props> = ({ active, onSwitch }) => {
+
+  const handleKanbanClick = () => {
+    onSwitch("kanban");
   };
 
   const handleCalendarClick = () => {
-    setActive("calendar");
+    onSwitch("calendar");
   };
 
   return (
     <div className={classes.modeSwitcher}>
       <span
-        className={`${active === "stages" ? classes.active : ""}`}
-        onClick={handleStagesClick}
+        className={`${active === "kanban" ? classes.active : ""}`}
+        onClick={handleKanbanClick}
       >
-        List of Stages
+        Kanban Board
       </span>
       <span
         className={`${active === "calendar" ? classes.active : ""}`}

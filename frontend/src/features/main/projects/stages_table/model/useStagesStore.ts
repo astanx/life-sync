@@ -10,6 +10,7 @@ interface Store {
   addStage: (stage: Stage) => void;
   updateStageLocal: (stage: Stage) => void;
   deleteStageLocal: (stageId: number) => void;
+  updateStagePosition: (stage: Stage, projectId: string) => void;
 }
 
 const useStagesStore = create<Store>((set) => ({
@@ -69,6 +70,14 @@ const useStagesStore = create<Store>((set) => ({
       stages: state.stages.filter((s) => s.id !== stageId),
     }));
   },
+  updateStagePosition: async (stage: Stage, projectId: string) => {
+    try {
+      await stagesAPI.updateStagePosition(stage, projectId);
+    } catch (error) {
+      console.error("Failed to update stage position:", error);
+      throw error;
+    }
+  }
 }));
 
 export { useStagesStore };

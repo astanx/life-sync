@@ -59,6 +59,8 @@ const StagesTable = () => {
               ...data,
               start: data.start,
               end: data.end,
+              status: data.status || 'todo',
+              position: data.position || 0
             });
             break;
           case "update":
@@ -66,6 +68,8 @@ const StagesTable = () => {
               ...data,
               start: data.start,
               end: data.end,
+              status: data.status,   
+              position: data.position
             });
             break;
           case "delete":
@@ -137,7 +141,7 @@ const StagesTable = () => {
     return result;
   };
 
-  if (stages) {
+  if (stages && stages.length > 0) {
     const allMonths = getAllMonths();
     const monthGroups = chunkArray(allMonths, 3);
 

@@ -28,6 +28,13 @@ const stagesAPI = {
     );
     return response;
   },
+  updateStagePosition: async (stage: Stage, projectId: string) => {
+    const response = await stagesIntence.patch(`/${projectId}`, {
+      ...stage,
+      id: +stage.id,
+    });
+    return response;
+  }
 };
 
 export { stagesAPI };

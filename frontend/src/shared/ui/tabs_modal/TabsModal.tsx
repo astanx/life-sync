@@ -16,7 +16,7 @@ const TabsModal: FC<Props> = ({
   deleteContent,
 }) => {
   const [activeTab, setActiveTab] = useState<"edit" | "delete">("edit");
-
+  
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className={classes.tabs}>
