@@ -123,6 +123,17 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		if payload.Status == "" {
+			payload.Status = "todo"
+		}
+
+		if payload.Position == 0 {
+			var maxPosition int
+			db.Model(&models.Stage{}).Where("project_id = ? AND status = ?", projectID, payload.Status).
+				Select("COALESCE(MAX(position), 0)").Scan(&maxPosition)
+			payload.Position = maxPosition + 1
+		}
+
 		layout := "2006-01-02"
 		startTime, err := time.Parse(layout, payload.Start)
 		if err != nil {
@@ -164,8 +175,8 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 			End:       endTime,
 			Userid:    uint(userID),
 			ProjectID: uint(projectID),
-			Status:    "todo",
-			Position:  0,
+			Status:    payload.Status,
+			Position:  payload.Position,
 		}
 
 		result = db.Create(&newStage)
@@ -175,11 +186,13 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		response := StageResponse{
-			ID:    newStage.ID,
-			Title: newStage.Title,
-			Start: newStage.Start,
-			End:   newStage.End,
-			Type:  "create",
+			ID:       newStage.ID,
+			Title:    newStage.Title,
+			Start:    newStage.Start,
+			End:      newStage.End,
+			Status:   newStage.Status,
+			Position: newStage.Position,
+			Type:     "create",
 		}
 
 		projectClientsMutex.RLock()
@@ -199,10 +212,12 @@ func CreateProjectStage(db *gorm.DB) gin.HandlerFunc {
 func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var payload struct {
-			StageID uint   `json:"id"`
-			Title   string `json:"title"`
-			Start   string `json:"start" binding:"required"`
-			End     string `json:"end" binding:"required"`
+			StageID  uint   `json:"id"`
+			Title    string `json:"title"`
+			Start    string `json:"start" binding:"required"`
+			End      string `json:"end" binding:"required"`
+			Status   string `json:"status"`
+			Position int    `json:"position"`
 		}
 
 		projectIDStr := c.Param("projectid")
@@ -276,11 +291,13 @@ func UpdateProjectStage(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		response := StageResponse{
-			ID:    updatedStage.ID,
-			Title: updatedStage.Title,
-			Start: updatedStage.Start,
-			End:   updatedStage.End,
-			Type:  "update",
+			ID:       updatedStage.ID,
+			Title:    updatedStage.Title,
+			Start:    updatedStage.Start,
+			End:      updatedStage.End,
+			Status:   updatedStage.Status,
+			Position: updatedStage.Position,
+			Type:     "update",
 		}
 
 		projectClientsMutex.RLock()
@@ -332,7 +349,7 @@ func GetProjectStages(db *gorm.DB) gin.HandlerFunc {
 
 		var stages []StageResponse
 		result = db.Model(&models.Stage{}).
-			Select(`id, title, start, "end"`).
+			Select(`id, title, start, "end", status, position`).
 			Where("project_id = ?", projectID).
 			Find(&stages)
 
