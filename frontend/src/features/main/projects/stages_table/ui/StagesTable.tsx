@@ -9,10 +9,10 @@ import {
   isWithinInterval,
   startOfWeek,
   endOfWeek,
-  eachMonthOfInterval,
   parseISO,
   isBefore,
   isAfter,
+  isSameMonth,
 } from "date-fns";
 import { useStagesStore } from "@/features/main/projects/stages_table/model";
 import { ProjectCreateStageModal } from "@/features/main/projects/modals/stages/project_create_stage_modal";
@@ -30,10 +30,20 @@ interface ProjectParams extends Record<string, string | undefined> {
   projectId?: string;
 }
 
+interface Connection {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+}
+
 const StagesTable = () => {
   const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
   const [isOpenModalTabs, setIsOpenModalTabs] = useState(false);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const cellsRef = useRef<Map<string, HTMLElement>>(new Map());
 
   const ws = useRef<WebSocket | null>(null);
   const { projectId } = useParams<ProjectParams>();
@@ -86,14 +96,22 @@ const StagesTable = () => {
     };
   }, [projectId]);
 
+  useEffect(() => {
+    if (stages.length > 0) {
+      setTimeout(calculateConnections, 100);
+    }
+  }, [stages]);
+
   const getAllMonths = (): MonthData[] => {
     const allMonths = new Set<string>();
 
     stages.forEach((stage) => {
       const start = parseISO(stage.start);
       const end = parseISO(stage.end);
-      const months = eachMonthOfInterval({ start, end });
-      months.forEach((month) => allMonths.add(format(month, "yyyy-MM")));
+      const startMonth = format(start, "yyyy-MM");
+      const endMonth = format(end, "yyyy-MM");
+      allMonths.add(startMonth);
+      allMonths.add(endMonth);
     });
 
     return Array.from(allMonths)
@@ -111,13 +129,48 @@ const StagesTable = () => {
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   };
 
-  const onCloseModalCreate = () => {
-    setIsOpenModalCreate(false);
-  };
+  const calculateConnections = () => {
+    const newConnections: Connection[] = [];
+    const sortedStages = [...stages].sort((a, b) => 
+      parseISO(a.start).getTime() - parseISO(b.start).getTime()
+    );
 
-  const onCloseModalTabs = () => {
-    setIsOpenModalTabs(false);
-    setSelectedStage(null);
+    for (let i = 0; i < sortedStages.length - 1; i++) {
+      const currentStage = sortedStages[i];
+      const nextStage = sortedStages[i + 1];
+      
+      const currentEnd = parseISO(currentStage.end);
+      const nextStart = parseISO(nextStage.start);
+      
+      if (isBefore(nextStart, currentEnd)) continue;
+
+      const currentWeek = endOfWeek(currentEnd, { weekStartsOn: 1 });
+      const nextWeek = startOfWeek(nextStart, { weekStartsOn: 1 });
+
+      const startCell = cellsRef.current.get(
+        `${format(currentWeek, "yyyy-MM-dd")}_${currentStage.id}`
+      );
+      const endCell = cellsRef.current.get(
+        `${format(nextWeek, "yyyy-MM-dd")}_${nextStage.id}`
+      );
+
+      if (startCell && endCell) {
+        const startRect = startCell.getBoundingClientRect();
+        const endRect = endCell.getBoundingClientRect();
+        const tableRect = tableRef.current?.getBoundingClientRect();
+
+        if (tableRect) {
+          newConnections.push({
+            startX: startRect.right - tableRect.left - 4,
+            startY: startRect.top - tableRect.top + startRect.height / 2,
+            endX: endRect.left - tableRect.left + 4,
+            endY: endRect.top - tableRect.top + endRect.height / 2,
+          });
+        }
+      }
+    }
+
+    setConnections(newConnections);
   };
 
   const isWeekInStage = (
@@ -141,42 +194,37 @@ const StagesTable = () => {
     return result;
   };
 
+  const handleStageClick = (stage: Stage) => {
+    setSelectedStage(stage);
+    setIsOpenModalTabs(true);
+  };
+
+  const onCloseModalCreate = () => {
+    setIsOpenModalCreate(false);
+  };
+  
+  const onCloseModalTabs = () => {
+    setIsOpenModalTabs(false);
+    setSelectedStage(null);
+  };
+
   if (stages && stages.length > 0) {
     const allMonths = getAllMonths();
     const monthGroups = chunkArray(allMonths, 3);
 
-    const isStageInGroup = (
-      stage: Stage,
-      groupMonths: MonthData[]
-    ): boolean => {
-      const stageStart = parseISO(stage.start);
-      const stageEnd = parseISO(stage.end);
-      return groupMonths.some((month) => {
-        const monthStart = startOfMonth(month.date);
-        const monthEnd = endOfMonth(month.date);
-        return (
-          isWithinInterval(monthStart, { start: stageStart, end: stageEnd }) ||
-          isWithinInterval(monthEnd, { start: stageStart, end: stageEnd }) ||
-          (isBefore(monthStart, stageStart) && isAfter(monthEnd, stageEnd))
-        );
-      });
-    };
-
-    const handleStageClick = (stage: Stage) => {
-      setSelectedStage(stage);
-      setIsOpenModalTabs(true);
-    };
-
     return (
       <>
         {monthGroups.map((group, groupIndex) => {
-          const filteredStages = stages.filter((stage) =>
-            isStageInGroup(stage, group)
+          const filteredStages = stages.filter(stage => 
+            group.some(month => 
+              isSameMonth(parseISO(stage.start), month.date) ||
+              isSameMonth(parseISO(stage.end), month.date)
+            )
           );
 
           return (
             <div key={groupIndex} className={classes.tableWrapper}>
-              <table className={classes.table}>
+              <table className={classes.table} ref={tableRef}>
                 <thead>
                   <tr>
                     <th className={classes.header}></th>
@@ -211,44 +259,57 @@ const StagesTable = () => {
                     <tr key={stage.id}>
                       <td
                         className={classes.cell}
-                        onClick={() => {
-                          handleStageClick(stage);
-                        }}
+                        onClick={() => handleStageClick(stage)}
                         style={{ cursor: "pointer" }}
                       >
                         {stage.title}
                       </td>
-                      {group.map((month, monthIndex) => (
-                        <Fragment key={`${stage.id}-${monthIndex}`}>
-                          {month.weeks.map((week, weekIndex) => {
-                            const weekStart = startOfWeek(week, {
-                              weekStartsOn: 1,
-                            });
-                            const weekEnd = endOfWeek(week, {
-                              weekStartsOn: 1,
-                            });
-                            return (
-                              <td
-                                key={`${stage.id}-${monthIndex}-${weekIndex}`}
-                                className={classes.cell}
-                              >
-                                {isWeekInStage(weekStart, weekEnd, stage) && (
-                                  <div
-                                    className={classes.stageBlock}
-                                    onClick={() => {
-                                      handleStageClick(stage);
-                                    }}
-                                  />
-                                )}
-                              </td>
-                            );
-                          })}
-                        </Fragment>
-                      ))}
+                      {group.map((month) =>
+                        month.weeks.map((week) => {
+                          const weekStart = startOfWeek(week, { weekStartsOn: 1 });
+                          const weekEnd = endOfWeek(week, { weekStartsOn: 1 });
+                          const isInStage = isWeekInStage(weekStart, weekEnd, stage);
+                          const weekKey = format(week, "yyyy-MM-dd");
+
+                          return (
+                            <td
+                              key={`${stage.id}-${weekKey}`}
+                              className={classes.cell}
+                              ref={(el) => {
+                                if (el && isInStage) {
+                                  cellsRef.current.set(
+                                    `${weekKey}_${stage.id}`,
+                                    el
+                                  );
+                                }
+                              }}
+                            >
+                              {isInStage && (
+                                <div
+                                  className={classes.stageBlock}
+                                  onClick={() => handleStageClick(stage)}
+                                />
+                              )}
+                            </td>
+                          );
+                        })
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
+              <svg className={classes.connectionsOverlay}>
+                {connections.map((conn, index) => (
+                  <path
+                    key={index}
+                    d={`M ${conn.startX} ${conn.startY} C ${conn.startX + 50} ${conn.startY}, ${conn.endX - 50} ${conn.endY}, ${conn.endX} ${conn.endY}`}
+                    stroke="#4CAF50"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeDasharray="4 2"
+                  />
+                ))}
+              </svg>
             </div>
           );
         })}

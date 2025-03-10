@@ -1,3 +1,37 @@
+.connectionLine {
+    position: absolute;
+    height: 2px;
+    background: #666;
+    width: calc(100% - 4px);
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    opacity: 0.6;
+  }
+  
+  .connectionRow {
+    height: 4px;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 5px,
+      #f8f9fa 5px,
+      #f8f9fa 10px
+    );
+  }
+  
+  .stageBlock {
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s;
+  }
+  
+  .stageBlock:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+
 .tableWrapper {
     width: 100%;
     overflow-x: auto;
@@ -103,6 +137,7 @@ tbody tr:last-child td:last-child {
     right: 2px;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 0;
 }
 
 @media (max-width: 1024px) {
