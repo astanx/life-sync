@@ -26,3 +26,12 @@ type Stage struct {
 	Status    string    `gorm:"not null;default:'todo'"`
 	Position  int       `gorm:"not null;default:0"`
 }
+
+type Task struct {
+	gorm.Model
+	Title     string `gorm:"not null"`
+	Position  int    `gorm:"not null;default:0"`
+	StageID   uint   `gorm:"not null"`
+	ProjectID uint   `gorm:"not null"`
+	Userid    uint   `gorm:"not null"`
+}
