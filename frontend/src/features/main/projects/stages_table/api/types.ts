@@ -7,4 +7,9 @@ interface Stage {
   status: "todo" | "in_progress" | "done";
 }
 
-export type { Stage };
+type Status = {
+  id: 'todo' | 'in_progress' | 'done';
+  title: string;
+};
+
+export type { Stage, Status };

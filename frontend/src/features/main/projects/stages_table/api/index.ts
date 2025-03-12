@@ -1,2 +1,2 @@
-export type { Stage } from "./types.ts";
+export type { Stage, Status } from "./types.ts";
 export { stagesAPI } from "./stages.ts";

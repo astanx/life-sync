@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { ProjectTabsModal } from "@/features/main/projects/modals/projects/project_tabs_modal";
 import { AddButton } from "@/shared/ui/add_button";
 import { AddCollaboratorModal } from "@/features/main/projects/modals/projects/add_collaborator_modal";
-import { KanbanBoard } from "@/features/main/projects/kanban_board";
+import { KanbanBoard } from "@/features/main/projects/kanban_board/ui";
 
 type Switches = "calendar" | "kanban";
 const ProjectWidget = () => {
