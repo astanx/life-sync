@@ -155,7 +155,8 @@ func GetTasks(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var tasks []models.Task
-		result := db.Where("project_id = ? AND stage_id = ?", projectID, stageID).
+		result := db.Model(&models.Task{}).
+			Where("project_id = ? AND stage_id = ?", projectID, stageID).
 			Order("position ASC").
 			Find(&tasks)
 
@@ -164,7 +165,19 @@ func GetTasks(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"tasks": tasks})
+		response := make([]TaskResponse, len(tasks))
+		for i, task := range tasks {
+			response[i] = TaskResponse{
+				ID:        task.ID,
+				Title:     task.Title,
+				Position:  task.Position,
+				StageID:   task.StageID,
+				ProjectID: task.ProjectID,
+				CreatedAt: task.CreatedAt,
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{"task": response})
 	}
 }
 
@@ -242,6 +255,7 @@ func UpdateTaskPosition(db *gorm.DB) gin.HandlerFunc {
 			StageID:   task.StageID,
 			ProjectID: task.ProjectID,
 			Type:      "update_task",
+			CreatedAt: task.CreatedAt,
 		}
 
 		broadcastTaskUpdate(uint(projectID), response)
