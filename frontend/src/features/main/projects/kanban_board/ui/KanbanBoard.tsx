@@ -9,57 +9,27 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useStagesStore } from "@/features/main/projects/stages_table/model";
 import classes from "./KanbanBoard.module.css";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Column } from "@/entities/main/project/kanban_board/column/Column";
-import { tasksAPI } from "@/features/main/projects/kanban_board/api";
+
 import { useTasksStore } from "@/features/main/projects/kanban_board/model";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-interface DragData {
-  stageId: number;
-  position: number;
-}
+import { tasksAPI } from "@/features/main/projects/kanban_board/api";
+import { useStagesLoader, useTasksLoader } from "@/shared/hooks";
+import { Column } from "@/entities/main/project/kanban_board/column/Column";
 
 const KanbanBoard = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const { stages } = useStagesStore();
-  const { tasks, addTask, updateTask, moveTask, getTasks } = useTasksStore();
+  const { stages } = useStagesLoader();
+  const { tasks } = useTasksLoader();
+  const { moveTask } = useTasksStore();
   const [activeId, setActiveId] = useState<number | null>(null);
-  const ws = useRef<WebSocket | null>(null);
-  const [currentStageId, setCurrentStageId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (projectId) {
-      stages.forEach((stage) => {
-        getTasks(projectId, stage.id.toString());
-      });
-    }
-  }, [projectId, stages]);
-
-  useEffect(() => {
-    if (!projectId) return;
-
-    ws.current = new WebSocket(
-      `wss://lifesync-backend.onrender.com/api/project/stages/${projectId}/tasks/ws`
-    );
-
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      switch (data.type) {
-        case "create_task":
-          addTask(data.task);
-          break;
-        case "update_task":
-          updateTask(data.id, data);
-          break;
-      }
-    };
-
-    return () => ws.current?.close();
-  }, [projectId]);
+  const [targetState, setTargetState] = useState<{
+    stageId: number;
+    position: number;
+  } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -72,44 +42,72 @@ const KanbanBoard = () => {
     const { over } = event;
     if (!over) return;
 
+    const isOverTask = over.data.current?.type === "task";
     const overId = over.id.toString();
-    const stageId = stages.find(s => s.id.toString() === overId)?.id;
-    
-    if (stageId) {
-      setCurrentStageId(stageId);
+
+    let newStageId: number;
+    let newPosition: number;
+
+    if (isOverTask) {
+      const overTask = tasks.find((t) => t.id.toString() === overId);
+      if (!overTask) return;
+      newStageId = overTask.stageId;
+      newPosition = overTask.position;
+    } else {
+      const stage = stages.find((s) => s.id.toString() === overId);
+      if (!stage) return;
+      newStageId = stage.id;
+      newPosition = tasks.filter((t) => t.stageId === newStageId).length;
     }
+
+    setTargetState({ stageId: newStageId, position: newPosition });
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || !currentStageId) return;
+    const { active } = event;
+    if (!targetState) return;
 
-    const activeData = active.data.current as DragData;
     const taskId = parseInt(active.id.toString());
+    const currentTask = tasks.find((t) => t.id === taskId);
+    if (!currentTask) return;
 
     try {
-      const newPosition = 0;
-      
-      // Обновляем задачу
-      moveTask(taskId, currentStageId, newPosition);
-      
+      moveTask(
+        taskId,
+        targetState.stageId,
+        targetState.position,
+        currentTask.stageId,
+        currentTask.position
+      );
+
       if (projectId) {
         await tasksAPI.updateTaskPosition(
           {
             id: taskId,
-            stage_id: currentStageId,
-            position: newPosition,
+            stage_id: targetState.stageId,
+            position: targetState.position,
           },
           projectId
         );
       }
     } catch (error) {
-      console.error('Task move failed:', error);
-      moveTask(taskId, activeData.stageId, activeData.position);
+      console.error("Task move failed:", error);
+
+      moveTask(
+        taskId,
+        currentTask.stageId,
+        currentTask.position,
+        targetState.stageId,
+        targetState.position
+      );
     } finally {
-      setCurrentStageId(null);
+      setTargetState(null);
     }
   };
+
+  if (!stages.length || !tasks.length) {
+    return <div className={classes.loading}>Loading board...</div>;
+  }
 
   return (
     <DndContext
@@ -125,7 +123,9 @@ const KanbanBoard = () => {
             key={stage.id}
             id={stage.id.toString()}
             title={stage.title}
-            tasks={tasks.filter((task) => task.stage_id === stage.id)}
+            tasks={tasks
+              .filter((task) => task.stageId === stage.id)
+              .sort((a, b) => a.position - b.position)}
           />
         ))}
       </div>

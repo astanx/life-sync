@@ -1,15 +1,22 @@
 import { useSortable } from "@dnd-kit/sortable";
-import { FC } from "react";
-import classes from './TaskItem.module.css'
 import { CSS } from "@dnd-kit/utilities";
-import { Task } from "@/features/main/projects/kanban_board/api";
+import classes from './TaskItem.module.css';
 
-type Props = {
+type Task = {
+  id: number;
+  title: string;
+  position: number;
+  stageId: number;
+  projectId: number;
+  createdAt: string;
+};
+
+type TaskItemProps = {
   task: Task;
   stageId: string;
 };
 
-const TaskItem: FC<Props> = ({ task, stageId }) => {
+const TaskItem = ({ task, stageId }: TaskItemProps) => {
   const {
     attributes,
     listeners,
@@ -43,4 +50,5 @@ const TaskItem: FC<Props> = ({ task, stageId }) => {
     </div>
   );
 };
-export { TaskItem };
+
+export { TaskItem};

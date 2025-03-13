@@ -14,20 +14,15 @@ import {
   isAfter,
   isSameMonth,
 } from "date-fns";
-import { useStagesStore } from "@/features/main/projects/stages_table/model";
 import { ProjectCreateStageModal } from "@/features/main/projects/modals/stages/project_create_stage_modal";
-import { useParams } from "react-router-dom";
 import { ProjectStagesTabsModal } from "@/features/main/projects/modals/stages/project_stages_tabs_modal";
 import { Stage } from "@/features/main/projects/stages_table/api";
+import { useStagesLoader } from "@/shared/hooks";
 
 interface MonthData {
   name: string;
   date: Date;
   weeks: Date[];
-}
-
-interface ProjectParams extends Record<string, string | undefined> {
-  projectId?: string;
 }
 
 interface Connection {
@@ -45,56 +40,7 @@ const StagesTable = () => {
   const tableRef = useRef<HTMLTableElement>(null);
   const cellsRef = useRef<Map<string, HTMLElement>>(new Map());
 
-  const ws = useRef<WebSocket | null>(null);
-  const { projectId } = useParams<ProjectParams>();
-  const { stages, getStages } = useStagesStore();
-
-  useEffect(() => {
-    if (!projectId) return;
-
-    getStages(projectId);
-
-    ws.current = new WebSocket(
-      `wss://lifesync-backend.onrender.com/api/project/stages/${projectId}/ws`
-    );
-
-    ws.current.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        const { addStage, updateStageLocal, deleteStageLocal } =
-          useStagesStore.getState();
-        switch (data.type) {
-          case "create":
-            addStage({
-              ...data,
-              start: data.start,
-              end: data.end,
-              status: data.status || 'todo',
-              position: data.position || 0
-            });
-            break;
-          case "update":
-            updateStageLocal({
-              ...data,
-              start: data.start,
-              end: data.end,
-              status: data.status,   
-              position: data.position
-            });
-            break;
-          case "delete":
-            deleteStageLocal(data.id);
-            break;
-        }
-      } catch (error) {
-        console.error("Error processing WebSocket message:", error);
-      }
-    };
-
-    return () => {
-      ws.current?.close();
-    };
-  }, [projectId]);
+  const { stages } = useStagesLoader();
 
   useEffect(() => {
     if (stages.length > 0) {
