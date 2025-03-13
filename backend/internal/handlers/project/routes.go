@@ -25,12 +25,16 @@ func SetupProjectRoutes(r *gin.RouterGroup, db *gorm.DB) {
 		projectStagesRoutes.GET("/ws", ProjectWebSocketHandler(db))
 	}
 
+	projectWsRoutes := projectRoutes.Group("/:projectid/ws")
+	{
+		projectWsRoutes.GET("/tasks", TaskWebSocketHandler(db))
+	}
+
 	taskRoutes := projectStagesRoutes.Group("/:stageid/tasks")
 	{
 		taskRoutes.GET("", GetTasks(db))
 		taskRoutes.POST("", CreateTask(db))
 		taskRoutes.PATCH("", UpdateTaskPosition(db))
-		taskRoutes.GET("/ws", TaskWebSocketHandler(db))
 	}
 
 	projectCollaboratorRoutes := projectRoutes.Group("/:id/collaborators")

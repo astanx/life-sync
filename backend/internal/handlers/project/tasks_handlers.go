@@ -44,6 +44,25 @@ func TaskWebSocketHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		claims, err := middleware.GetUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+			return
+		}
+
+		var project models.Project
+		if err := db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectID, uint(userID), uint(userID)).First(&project).Error; err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
 		conn, err := taskUpgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
 			log.Printf("Task WebSocket upgrade error: %v", err)
@@ -103,6 +122,13 @@ func CreateTask(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		var project models.Project
+		if err := db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectID, uint(userID), uint(userID)).First(&project).Error; err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
 		var maxPosition int
 		db.Model(&models.Task{}).Where("stage_id = ?", payload.StageID).
 			Select("COALESCE(MAX(position), 0)").Scan(&maxPosition)
@@ -132,7 +158,6 @@ func CreateTask(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		broadcastTaskUpdate(uint(projectID), response)
-
 		c.JSON(http.StatusCreated, gin.H{"task": response})
 	}
 }
@@ -151,6 +176,25 @@ func GetTasks(db *gorm.DB) gin.HandlerFunc {
 		stageID, err := strconv.ParseUint(stageIDStr, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid stage ID"})
+			return
+		}
+
+		claims, err := middleware.GetUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+			return
+		}
+
+		var project models.Project
+		if err := db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectID, uint(userID), uint(userID)).First(&project).Error; err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 			return
 		}
 
@@ -198,6 +242,25 @@ func UpdateTaskPosition(db *gorm.DB) gin.HandlerFunc {
 		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+			return
+		}
+
+		claims, err := middleware.GetUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+			return
+		}
+
+		var project models.Project
+		if err := db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectID, uint(userID), uint(userID)).First(&project).Error; err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 			return
 		}
 
