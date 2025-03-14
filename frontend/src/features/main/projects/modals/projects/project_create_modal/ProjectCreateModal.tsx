@@ -30,6 +30,7 @@ const ProjectCreateModal: FC<Props> = ({ isOpen, onClose }) => {
         navigate(`/dashboard/project/${projectId}`);
       }
     } catch (error) {
+      console.error(error)
       toast.error("Failed to create project");
     }
   };
