@@ -1,0 +1,21 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 400px;
+    max-width: 100%;
+    padding: 1rem;
+  }
+  
+  .form input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  
+  .form input:focus {
+    border-color: #4dabf7;
+    outline: none;
+  }

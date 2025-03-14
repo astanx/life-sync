@@ -1,4 +1,4 @@
-type Task = {
+type TaskResponse = {
   id: number;
   title: string;
   position: number;
@@ -6,4 +6,14 @@ type Task = {
   project_id: number;
   created_at: string;
 };
-export type { Task };
+
+type Task = {
+  id: number;
+  title: string;
+  position: number;
+  stageId: number;
+  projectId: number;
+  createdAt: string;
+};
+
+export type { Task, TaskResponse };

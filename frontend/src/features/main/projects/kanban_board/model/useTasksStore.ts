@@ -1,18 +1,14 @@
 import { create } from "zustand";
-import { tasksAPI } from "@/features/main/projects/kanban_board/api";
+import {
+  Task,
+  TaskResponse,
+  tasksAPI,
+} from "@/features/main/projects/kanban_board/api";
 import { createJSONStorage, persist } from "zustand/middleware";
-
-type Task = {
-  id: number;
-  title: string;
-  position: number;
-  stageId: number;
-  projectId: number;
-  createdAt: string;
-};
 
 interface TasksStore {
   tasks: Task[];
+  isOpenModalTasks: boolean;
   addTask: (task: Task) => void;
   updateTask: (taskId: number, updates: Partial<Task>) => void;
   moveTask: (
@@ -24,12 +20,19 @@ interface TasksStore {
   ) => void;
   setTasks: (tasks: Task[]) => void;
   getTasks: (projectId: string, stageId: string) => Promise<void>;
+  createTask: (
+    title: string,
+    stageId: number,
+    projectId: string
+  ) => Promise<void>;
+  updateIsOpenModalTasks: (isOpen: boolean) => void;
 }
 
 const useTasksStore = create<TasksStore>()(
   persist(
     (set) => ({
       tasks: [],
+      isOpenModalTasks: false,
 
       addTask: (task) =>
         set((state) => ({
@@ -74,7 +77,7 @@ const useTasksStore = create<TasksStore>()(
       getTasks: async (projectId, stageId) => {
         try {
           const response = await tasksAPI.getTasks(projectId, stageId);
-          const normalizedTasks = response.data.task.map((t: any) => ({
+          const normalizedTasks = response.data.task.map((t: TaskResponse) => ({
             id: t.id,
             title: t.title,
             position: t.position,
@@ -93,6 +96,33 @@ const useTasksStore = create<TasksStore>()(
           console.error("Error loading tasks:", error);
         }
       },
+      createTask: async (title, stageId, projectId) => {
+        try {
+          const response = await tasksAPI.createTask(
+            { title, stage_id: stageId },
+            projectId,
+            stageId.toString()
+          );
+
+          const newTask = {
+            id: response.data.id,
+            title: response.data.title,
+            position: response.data.position,
+            stageId: stageId,
+            projectId: parseInt(projectId),
+            createdAt: new Date().toISOString(),
+          };
+
+          set((state) => ({
+            tasks: [...state.tasks, newTask],
+          }));
+        } catch (error) {
+          console.error("Error creating task:", error);
+          throw error;
+        }
+      },
+      updateIsOpenModalTasks: (isOpen: boolean) =>
+        set(() => ({ isOpenModalTasks: isOpen })),
     }),
     {
       name: "tasks-storage",

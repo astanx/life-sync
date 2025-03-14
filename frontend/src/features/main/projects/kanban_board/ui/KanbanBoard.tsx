@@ -19,17 +19,21 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { tasksAPI } from "@/features/main/projects/kanban_board/api";
 import { useStagesLoader, useTasksLoader } from "@/shared/hooks";
 import { Column } from "@/entities/main/project/kanban_board/column/Column";
+import { ProjectTaskCreateModal } from "../../modals/tasks/project_task_create_modal";
 
 const KanbanBoard = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { stages } = useStagesLoader();
   const { tasks } = useTasksLoader();
   const { moveTask } = useTasksStore();
+  const [activeStageId, setActiveStageId] = useState<number | null>(null)
   const [activeId, setActiveId] = useState<number | null>(null);
   const [targetState, setTargetState] = useState<{
     stageId: number;
     position: number;
   } | null>(null);
+
+  const {isOpenModalTasks, updateIsOpenModalTasks} = useTasksStore()
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -105,39 +109,52 @@ const KanbanBoard = () => {
     }
   };
 
-  if (!stages.length || !tasks.length) {
-    return <div className={classes.loading}>Loading board...</div>;
+  const handleColumnClick = (stageId: number) => {
+    setActiveStageId(stageId)
+    updateIsOpenModalTasks(true)
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={({ active }) => setActiveId(parseInt(active.id.toString()))}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      <div className={classes.kanbanBoard}>
-        {stages.map((stage) => (
-          <Column
-            key={stage.id}
-            id={stage.id.toString()}
-            title={stage.title}
-            tasks={tasks
-              .filter((task) => task.stageId === stage.id)
-              .sort((a, b) => a.position - b.position)}
-          />
-        ))}
-      </div>
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={({ active }) =>
+          setActiveId(parseInt(active.id.toString()))
+        }
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <div className={classes.kanbanBoard}>
+          {stages.map((stage) => (
+            <Column
+            onClick={handleColumnClick}
+              key={stage.id}
+              id={stage.id.toString()}
+              title={stage.title}
+              tasks={tasks
+                .filter((task) => task.stageId === stage.id)
+                .sort((a, b) => a.position - b.position)}
+              projectId={projectId || ""}
+            />
+          ))}
+        </div>
 
-      <DragOverlay>
-        {activeId && (
-          <div className={classes.card}>
-            {tasks.find((task) => task.id === activeId)?.title}
-          </div>
-        )}
-      </DragOverlay>
-    </DndContext>
+        <DragOverlay>
+          {activeId && (
+            <div className={classes.card}>
+              {tasks.find((task) => task.id === activeId)?.title}
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
+      <ProjectTaskCreateModal
+        isOpen={isOpenModalTasks}
+        onClose={() => updateIsOpenModalTasks(false)}
+        stageId={activeStageId || 0}
+        projectId={projectId || ""}
+      />
+    </>
   );
 };
 

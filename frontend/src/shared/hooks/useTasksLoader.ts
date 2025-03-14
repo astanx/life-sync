@@ -1,10 +1,12 @@
 import { useTasksStore } from "@/features/main/projects/kanban_board/model";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useStagesLoader } from "./useStagesLoader";
 
-export const useTasksLoader = () => {
+const useTasksLoader = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { tasks, getTasks, addTask, updateTask } = useTasksStore();
+  const { stages } = useStagesLoader();
 
   useEffect(() => {
     if (!projectId) return;
@@ -14,7 +16,7 @@ export const useTasksLoader = () => {
 
     ws.onopen = () => {
       console.log("WebSocket connected");
-      getTasks(projectId, "0");
+      stages.forEach((stage) => getTasks(projectId, stage.id.toString()));
     };
 
     ws.onmessage = (event) => {
@@ -52,7 +54,11 @@ export const useTasksLoader = () => {
 
     ws.onclose = (event) => {
       console.log("WebSocket closed:", event.code, event.reason);
-      setTimeout(() => getTasks(projectId, "0"), 5000);
+      setTimeout(
+        () =>
+          stages.forEach((stage) => getTasks(projectId, stage.id.toString())),
+        5000
+      );
     };
 
     return () => ws.close();
@@ -60,3 +66,5 @@ export const useTasksLoader = () => {
 
   return { tasks };
 };
+
+export { useTasksLoader };
