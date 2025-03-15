@@ -366,7 +366,7 @@ func GetProjectStages(db *gorm.DB) gin.HandlerFunc {
 
 func DeleteProjectStage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		stageIDStr := c.Param("id")
+		stageIDStr := c.Param("stageid")
 		projectIDStr := c.Param("projectid")
 
 		if stageIDStr == "" || projectIDStr == "" {

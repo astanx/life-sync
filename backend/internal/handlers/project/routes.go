@@ -21,7 +21,7 @@ func SetupProjectRoutes(r *gin.RouterGroup, db *gorm.DB) {
 		projectStagesRoutes.POST("", CreateProjectStage(db))
 		projectStagesRoutes.PUT("", UpdateProjectStage(db))
 		projectStagesRoutes.PATCH("", UpdateStagePosition(db))
-		projectStagesRoutes.DELETE("/:id", DeleteProjectStage(db))
+		projectStagesRoutes.DELETE("/:stageid", DeleteProjectStage(db))
 		projectStagesRoutes.GET("/ws", ProjectWebSocketHandler(db))
 	}
 
