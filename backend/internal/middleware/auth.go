@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"lifeSync/internal/config"
 
@@ -50,4 +51,17 @@ func CreateTokenFromClaims(claims map[string]interface{}) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func GetCurrentUserID(c *gin.Context) (uint, error) {
+	claims, err := GetUserClaimsFromCookie(c)
+	if err != nil {
+		return 0, err
+	}
+
+	userID, ok := claims["userid"].(float64)
+	if !ok {
+		return 0, errors.New("invalid user ID in token")
+	}
+	return uint(userID), nil
 }

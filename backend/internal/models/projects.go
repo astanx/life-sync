@@ -25,13 +25,22 @@ type Stage struct {
 	Userid    uint      `gorm:"not null"`
 	Status    string    `gorm:"not null;default:'todo'"`
 	Position  int       `gorm:"not null;default:0"`
+	Tasks     []Task    `gorm:"foreignKey:StageID"`
 }
 
 type Task struct {
 	gorm.Model
-	Title     string `gorm:"not null"`
-	Position  int    `gorm:"not null;default:0"`
-	StageID   uint   `gorm:"not null"`
-	ProjectID uint   `gorm:"not null"`
-	Userid    uint   `gorm:"not null"`
+	Title         string             `gorm:"not null"`
+	Position      int                `gorm:"not null;default:0"`
+	StageID       uint               `gorm:"not null"`
+	ProjectID     uint               `gorm:"not null"`
+	Userid        uint               `gorm:"not null"`
+	Collaborators []TaskCollaborator `gorm:"foreignKey:TaskID"`
+}
+
+type TaskCollaborator struct {
+	gorm.Model
+	TaskID    uint   `gorm:"not null"`
+	UserID    uint   `gorm:"not null"`
+	UserEmail string `gorm:"not null"`
 }

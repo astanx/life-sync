@@ -15,13 +15,19 @@ import (
 )
 
 type TaskResponse struct {
-	ID        uint      `json:"id"`
-	Title     string    `json:"title"`
-	Position  int       `json:"position"`
-	StageID   uint      `json:"stage_id"`
-	ProjectID uint      `json:"project_id"`
-	Type      string    `json:"type"`
-	CreatedAt time.Time `json:"created_at"`
+	ID            uint                   `json:"id"`
+	Title         string                 `json:"title"`
+	Position      int                    `json:"position"`
+	StageID       uint                   `json:"stage_id"`
+	ProjectID     uint                   `json:"project_id"`
+	Type          string                 `json:"type"`
+	CreatedAt     time.Time              `json:"created_at"`
+	Collaborators []CollaboratorResponse `json:"collaborators"`
+}
+
+type CollaboratorResponse struct {
+	ID    uint   `json:"id"`
+	Email string `json:"email"`
 }
 
 var (
@@ -212,12 +218,13 @@ func GetTasks(db *gorm.DB) gin.HandlerFunc {
 		response := make([]TaskResponse, len(tasks))
 		for i, task := range tasks {
 			response[i] = TaskResponse{
-				ID:        task.ID,
-				Title:     task.Title,
-				Position:  task.Position,
-				StageID:   task.StageID,
-				ProjectID: task.ProjectID,
-				CreatedAt: task.CreatedAt,
+				ID:            task.ID,
+				Title:         task.Title,
+				Position:      task.Position,
+				StageID:       task.StageID,
+				ProjectID:     task.ProjectID,
+				CreatedAt:     task.CreatedAt,
+				Collaborators: getTaskCollaborators(db, task.ID),
 			}
 		}
 
@@ -403,6 +410,166 @@ func DeleteTask(db *gorm.DB) gin.HandlerFunc {
 		broadcastTaskUpdate(uint(projectID), response)
 		c.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
 	}
+}
+
+func AddTaskCollaborator(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectIDStr := c.Param("projectid")
+		taskIDStr := c.Param("taskid")
+
+		var payload struct {
+			UserID uint `json:"userId" binding:"required"`
+		}
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+			return
+		}
+
+		taskID, err := strconv.ParseUint(taskIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+			return
+		}
+
+		currentUserID, err := middleware.GetCurrentUserID(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		if !isProjectCollaborator(db, uint(projectID), currentUserID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
+		var targetUser models.User
+		if err := db.First(&targetUser, payload.UserID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
+		var existing models.TaskCollaborator
+		if err := db.Where("task_id = ? AND user_id = ?", taskID, payload.UserID).First(&existing).Error; err == nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "User already collaborator"})
+			return
+		}
+
+		collaborator := models.TaskCollaborator{
+			TaskID:    uint(taskID),
+			UserID:    payload.UserID,
+			UserEmail: targetUser.Email,
+		}
+
+		if err := db.Create(&collaborator).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		broadcastTaskUpdate(uint(projectID), TaskResponse{
+			ID:            uint(taskID),
+			Type:          "update_collaborators",
+			Collaborators: getTaskCollaborators(db, uint(taskID)),
+		})
+
+		c.JSON(http.StatusOK, gin.H{"message": "Collaborator added"})
+	}
+}
+
+func RemoveTaskCollaborator(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectIDStr := c.Param("projectid")
+		taskIDStr := c.Param("taskid")
+		userIDStr := c.Param("userid")
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+			return
+		}
+
+		taskID, err := strconv.ParseUint(taskIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+			return
+		}
+
+		userID, err := strconv.ParseUint(userIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+
+		currentUserID, err := middleware.GetCurrentUserID(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		if !isProjectOwner(db, uint(projectID), currentUserID) && currentUserID != uint(userID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
+		if !isProjectOwner(db, uint(projectID), currentUserID) && currentUserID != uint(userID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
+		if err := db.Where("task_id = ? AND user_id = ?", taskID, userID).Delete(&models.TaskCollaborator{}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		broadcastTaskUpdate(uint(projectID), TaskResponse{
+			ID:            uint(taskID),
+			Type:          "update_collaborators",
+			Collaborators: getTaskCollaborators(db, uint(taskID)),
+		})
+
+		c.JSON(http.StatusOK, gin.H{"message": "Collaborator removed"})
+	}
+}
+
+func getTaskCollaborators(db *gorm.DB, taskID uint) []CollaboratorResponse {
+	var collaborators []models.TaskCollaborator
+	db.Where("task_id = ?", taskID).Find(&collaborators)
+
+	result := make([]CollaboratorResponse, len(collaborators))
+	for i, c := range collaborators {
+		result[i] = CollaboratorResponse{
+			ID:    c.UserID,
+			Email: c.UserEmail,
+		}
+	}
+	return result
+}
+
+func isProjectCollaborator(db *gorm.DB, projectID uint, userID uint) bool {
+	var project models.Project
+	if err := db.First(&project, projectID).Error; err != nil {
+		return false
+	}
+
+	if project.Userid == userID {
+		return true
+	}
+
+	for _, id := range project.CollaboratorUserIDs {
+		if uint(id) == userID {
+			return true
+		}
+	}
+	return false
+}
+
+func isProjectOwner(db *gorm.DB, projectID uint, userID uint) bool {
+	var project models.Project
+	if err := db.First(&project, projectID).Error; err != nil {
+		return false
+	}
+	return project.Userid == userID
 }
 
 func broadcastTaskUpdate(projectID uint, response TaskResponse) {

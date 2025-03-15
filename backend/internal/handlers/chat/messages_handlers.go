@@ -152,7 +152,6 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 			Sender:    newMessage.Sender,
 		}
 
-		// Рассылка через WebSocket
 		clientsMutex.RLock()
 		chatClients := clients[newMessage.ChatID]
 		for client := range chatClients {
