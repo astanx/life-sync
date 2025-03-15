@@ -34,6 +34,7 @@ func SetupProjectRoutes(r *gin.RouterGroup, db *gorm.DB) {
 	{
 		taskRoutes.GET("", GetTasks(db))
 		taskRoutes.POST("", CreateTask(db))
+		taskRoutes.DELETE("/:taskid", DeleteTask(db))
 		taskRoutes.PATCH("", UpdateTaskPosition(db))
 	}
 

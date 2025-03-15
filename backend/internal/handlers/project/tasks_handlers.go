@@ -326,6 +326,85 @@ func UpdateTaskPosition(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+func DeleteTask(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectIDStr := c.Param("projectid")
+		stageIDStr := c.Param("stageid")
+		taskIDStr := c.Param("taskid")
+
+		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+			return
+		}
+
+		stageID, err := strconv.ParseUint(stageIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid stage ID"})
+			return
+		}
+
+		taskID, err := strconv.ParseUint(taskIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+			return
+		}
+
+		claims, err := middleware.GetUserClaimsFromCookie(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+
+		userID, ok := claims["userid"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+			return
+		}
+
+		var project models.Project
+		if err := db.Where("id = ? AND (userid = ? OR ? = ANY(collaborator_user_ids))",
+			projectID, uint(userID), uint(userID)).First(&project).Error; err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+
+		var task models.Task
+		if err := db.Where("id = ? AND stage_id = ?", taskID, stageID).First(&task).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+			return
+		}
+
+		err = db.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Delete(&task).Error; err != nil {
+				return err
+			}
+
+			if err := tx.Model(&models.Task{}).
+				Where("stage_id = ? AND position > ?", stageID, task.Position).
+				Update("position", gorm.Expr("position - 1")).Error; err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		response := TaskResponse{
+			ID:        task.ID,
+			Type:      "delete_task",
+			CreatedAt: task.CreatedAt,
+		}
+
+		broadcastTaskUpdate(uint(projectID), response)
+		c.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
+	}
+}
+
 func broadcastTaskUpdate(projectID uint, response TaskResponse) {
 	taskClientsMutex.RLock()
 	defer taskClientsMutex.RUnlock()
