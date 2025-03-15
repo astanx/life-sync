@@ -33,6 +33,7 @@ const ProjectEditModalContent: FC<Props> = ({ onClose }) => {
         reset();
       }
     } catch (error) {
+      console.error(error)
       toast.error("Failed to update project");
     }
   };

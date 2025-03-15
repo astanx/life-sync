@@ -9,6 +9,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 interface TasksStore {
   tasks: Task[];
   isOpenModalTasks: boolean;
+  isOpenModalTabs: boolean;
   addTask: (task: Task) => void;
   updateTask: (taskId: number, updates: Partial<Task>) => void;
   moveTask: (
@@ -26,6 +27,18 @@ interface TasksStore {
     projectId: string
   ) => Promise<void>;
   updateIsOpenModalTasks: (isOpen: boolean) => void;
+  removeTask: (taskId: number) => void;
+  updateIsOpenModalTabs: (isOpen: boolean) => void;
+  deleteTask: (
+    taskId: number,
+    stageId: number,
+    projectId: string
+  ) => Promise<void>;
+  updateTaskTitle: (
+    taskId: number,
+    newTitle: string,
+    projectId: string
+  ) => Promise<void>;
 }
 
 const useTasksStore = create<TasksStore>()(
@@ -33,6 +46,7 @@ const useTasksStore = create<TasksStore>()(
     (set) => ({
       tasks: [],
       isOpenModalTasks: false,
+      isOpenModalTabs: false,
 
       addTask: (task) =>
         set((state) => ({
@@ -44,6 +58,10 @@ const useTasksStore = create<TasksStore>()(
           tasks: state.tasks.map((task) =>
             task.id === taskId ? { ...task, ...updates } : task
           ),
+        })),
+      removeTask: (taskId: number) =>
+        set((state) => ({
+          tasks: state.tasks.filter((t) => t.id !== taskId),
         })),
 
       moveTask: (taskId, newStageId, newPosition, oldStageId, oldPosition) => {
@@ -123,7 +141,40 @@ const useTasksStore = create<TasksStore>()(
       },
       updateIsOpenModalTasks: (isOpen: boolean) =>
         set(() => ({ isOpenModalTasks: isOpen })),
+      deleteTask: async (taskId, stageId, projectId) => {
+        try {
+          await tasksAPI.deleteTask(taskId, stageId, projectId);
+        } catch (error) {
+          console.error("Error deleting task:", error);
+          throw error;
+        }
+      },
+      updateTaskTitle: async (taskId, newTitle, projectId) => {
+        try {
+          const task = useTasksStore
+            .getState()
+            .tasks.find((t) => t.id === taskId);
+          if (!task) return;
+
+          await tasksAPI.updateTask(
+            { id: taskId, title: newTitle, stage_id: task.stageId },
+            projectId
+          );
+
+          set((state) => ({
+            tasks: state.tasks.map((t) =>
+              t.id === taskId ? { ...t, title: newTitle } : t
+            ),
+          }));
+        } catch (error) {
+          console.error("Error updating task title:", error);
+          throw error;
+        }
+      },
+      updateIsOpenModalTabs: (isOpen: boolean) =>
+        set(() => ({ isOpenModalTabs: isOpen })),
     }),
+
     {
       name: "tasks-storage",
       storage: createJSONStorage(() => sessionStorage),

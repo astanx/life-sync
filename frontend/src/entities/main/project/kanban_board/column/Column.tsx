@@ -12,11 +12,23 @@ type ColumnProps = {
   tasks: Task[];
   title: string;
   projectId: string;
-  onClick: (stageId: number) => void
+  onClick: (stageId: number) => void;
+  onItemClick: (task: Task) => void;
 };
 
-const Column: FC<ColumnProps> = ({ id, title, tasks, onClick }) => {
-  const { setNodeRef } = useDroppable({ id });
+const Column: FC<ColumnProps> = ({
+  id,
+  title,
+  tasks,
+  onClick,
+  onItemClick,
+}) => {
+  const { setNodeRef } = useDroppable({
+    id,
+    data: {
+      type: "stage",
+    },
+  });
 
   return (
     <div ref={setNodeRef} className={classes.column}>
@@ -25,6 +37,7 @@ const Column: FC<ColumnProps> = ({ id, title, tasks, onClick }) => {
         <button
           className={classes.addButton}
           onClick={() => onClick(+id)}
+          aria-label="Add task"
         >
           <FontAwesomeIcon icon={faPlus} />
         </button>
@@ -32,10 +45,18 @@ const Column: FC<ColumnProps> = ({ id, title, tasks, onClick }) => {
 
       <SortableContext items={tasks.map((t) => t.id.toString())}>
         {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} stageId={id} />
+          <TaskItem
+            key={task.id}
+            task={task}
+            stageId={id}
+            onClick={onItemClick}
+          />
         ))}
       </SortableContext>
 
+      {tasks.length === 0 && (
+        <div className={classes.emptyState}>Drop tasks here</div>
+      )}
     </div>
   );
 };

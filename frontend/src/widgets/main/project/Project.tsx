@@ -25,7 +25,7 @@ const ProjectWidget = () => {
     if (projectId) {
       setTitle(getProjectTitle(projectId));
     }
-  }, [projectId, isOpenModal]);
+  }, [projectId, isOpenModal, getProjectTitle]);
 
   const handleCloseModal = () => {
     setIsOpenModal(false);

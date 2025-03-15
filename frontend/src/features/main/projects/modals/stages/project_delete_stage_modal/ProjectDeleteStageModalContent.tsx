@@ -23,6 +23,7 @@ const ProjectDeleteStageModalContent: FC<Props> = ({ onClose, id }) => {
       toast.success("Stage deleted successfully!");
       onClose();
     } catch (error) {
+      console.error(error)
       toast.error("Failed to delete stage");
     }
   };

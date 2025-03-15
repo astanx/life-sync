@@ -25,6 +25,7 @@ const ProjectDeleteModalContent: FC<Props> = ({ onClose }) => {
         onClose();
       }
     } catch (error) {
+      console.error(error);
       toast.error("Failed to delete project");
     }
   };

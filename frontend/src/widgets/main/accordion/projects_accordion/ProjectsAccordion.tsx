@@ -26,7 +26,7 @@ const ProjectsAccordion: FC<Props> = ({ closeMenu }) => {
 
   useEffect(() => {
     getProjects();
-  }, []);
+  }, [getProjects]);
 
   return (
     <div className={classes.accordion_container}>

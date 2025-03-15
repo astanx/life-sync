@@ -12,28 +12,33 @@ import {
 import classes from "./KanbanBoard.module.css";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-
 import { useTasksStore } from "@/features/main/projects/kanban_board/model";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-
-import { tasksAPI } from "@/features/main/projects/kanban_board/api";
+import { Task, tasksAPI } from "@/features/main/projects/kanban_board/api";
 import { useStagesLoader, useTasksLoader } from "@/shared/hooks";
 import { Column } from "@/entities/main/project/kanban_board/column/Column";
-import { ProjectTaskCreateModal } from "../../modals/tasks/project_task_create_modal";
+import { ProjectTaskCreateModal } from "@/features/main/projects/modals/tasks/project_task_create_modal";
+import { ProjectTaskTabsModal } from "@/features/main/projects/modals/tasks/project_task_tabs_modal";
 
 const KanbanBoard = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { stages } = useStagesLoader();
   const { tasks } = useTasksLoader();
   const { moveTask } = useTasksStore();
-  const [activeStageId, setActiveStageId] = useState<number | null>(null)
+  const [activeStageId, setActiveStageId] = useState<number | null>(null);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [targetState, setTargetState] = useState<{
     stageId: number;
     position: number;
   } | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const {isOpenModalTasks, updateIsOpenModalTasks} = useTasksStore()
+  const {
+    isOpenModalTasks,
+    updateIsOpenModalTasks,
+    isOpenModalTabs,
+    updateIsOpenModalTabs,
+  } = useTasksStore();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -43,25 +48,31 @@ const KanbanBoard = () => {
   );
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { over } = event;
+    const { active, over } = event;
     if (!over) return;
 
-    const isOverTask = over.data.current?.type === "task";
-    const overId = over.id.toString();
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type;
+
+    if (activeType !== "task") return;
 
     let newStageId: number;
     let newPosition: number;
 
-    if (isOverTask) {
-      const overTask = tasks.find((t) => t.id.toString() === overId);
+    if (overType === "task") {
+      const overTask = tasks.find(
+        (t) => t.id.toString() === over.id.toString()
+      );
       if (!overTask) return;
       newStageId = overTask.stageId;
       newPosition = overTask.position;
-    } else {
-      const stage = stages.find((s) => s.id.toString() === overId);
+    } else if (overType === "stage") {
+      const stage = stages.find((s) => s.id.toString() === over.id.toString());
       if (!stage) return;
       newStageId = stage.id;
       newPosition = tasks.filter((t) => t.stageId === newStageId).length;
+    } else {
+      return;
     }
 
     setTargetState({ stageId: newStageId, position: newPosition });
@@ -96,7 +107,6 @@ const KanbanBoard = () => {
       }
     } catch (error) {
       console.error("Task move failed:", error);
-
       moveTask(
         taskId,
         currentTask.stageId,
@@ -110,9 +120,14 @@ const KanbanBoard = () => {
   };
 
   const handleColumnClick = (stageId: number) => {
-    setActiveStageId(stageId)
-    updateIsOpenModalTasks(true)
-  }
+    setActiveStageId(stageId);
+    updateIsOpenModalTasks(true);
+  };
+
+  const handleItemClick = (task: Task) => {
+    setSelectedTask(task);
+    updateIsOpenModalTabs(true);
+  };
 
   return (
     <>
@@ -128,13 +143,14 @@ const KanbanBoard = () => {
         <div className={classes.kanbanBoard}>
           {stages.map((stage) => (
             <Column
-            onClick={handleColumnClick}
+              onClick={handleColumnClick}
               key={stage.id}
               id={stage.id.toString()}
               title={stage.title}
               tasks={tasks
                 .filter((task) => task.stageId === stage.id)
                 .sort((a, b) => a.position - b.position)}
+              onItemClick={handleItemClick}
               projectId={projectId || ""}
             />
           ))}
@@ -154,6 +170,13 @@ const KanbanBoard = () => {
         stageId={activeStageId || 0}
         projectId={projectId || ""}
       />
+      {selectedTask && (
+        <ProjectTaskTabsModal
+          isOpen={isOpenModalTabs}
+          onClose={() => updateIsOpenModalTabs(false)}
+          task={selectedTask}
+        />
+      )}
     </>
   );
 };

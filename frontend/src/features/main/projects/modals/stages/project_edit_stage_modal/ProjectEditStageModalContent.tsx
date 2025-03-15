@@ -46,6 +46,7 @@ const ProjectEditStageModalContent: FC<Props> = ({ onClose, stage }) => {
       toast.success("Stage updated successfully!");
       onClose();
     } catch (error) {
+      console.error(error)
       toast.error("Failed to update stage");
     }
   };

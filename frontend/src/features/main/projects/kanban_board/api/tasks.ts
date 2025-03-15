@@ -4,6 +4,13 @@ type UpdateTaskPositionPayload = {
   stage_id: number;
   position: number;
 };
+type UpdateTaskPayload = {
+  id: number;
+  title?: string;
+  stage_id?: number;
+  position?: number;
+};
+
 const tasksAPI = {
   createTask: async (
     task: { title: string; stage_id: number },
@@ -27,6 +34,20 @@ const tasksAPI = {
     const response = await tasksIntence.patch(
       `/${projectId}/${task.stage_id}/tasks`,
       task
+    );
+    return response;
+  },
+  updateTask: async (task: UpdateTaskPayload, projectId: string) => {
+    const response = await tasksIntence.patch(
+      `/${projectId}/${task.stage_id}/tasks`,
+      task
+    );
+    return response;
+  },
+
+  deleteTask: async (taskId: number, stageId: number, projectId: string) => {
+    const response = await tasksIntence.delete(
+      `/${projectId}/${stageId}/tasks/${taskId}`
     );
     return response;
   },

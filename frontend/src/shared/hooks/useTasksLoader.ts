@@ -1,12 +1,12 @@
 import { useTasksStore } from "@/features/main/projects/kanban_board/model";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useStagesLoader } from "./useStagesLoader";
+import { useStagesStore } from "@/features/main/projects/stages_table/model";
 
 const useTasksLoader = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const { tasks, getTasks, addTask, updateTask } = useTasksStore();
-  const { stages } = useStagesLoader();
+  const { tasks, getTasks, addTask, updateTask, removeTask } = useTasksStore();
+  const { stages } = useStagesStore();
 
   useEffect(() => {
     if (!projectId) return;
@@ -42,6 +42,9 @@ const useTasksLoader = () => {
               position: normalized.position,
             });
             break;
+          case "delete_task":
+            removeTask(normalized.id);
+            break;
         }
       } catch (error) {
         console.error("WebSocket message error:", error);
@@ -62,7 +65,7 @@ const useTasksLoader = () => {
     };
 
     return () => ws.close();
-  }, [projectId, addTask, updateTask, getTasks]);
+  }, [projectId, addTask, updateTask, getTasks, stages, removeTask]);
 
   return { tasks };
 };

@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import classes from './TaskItem.module.css';
+import classes from "./TaskItem.module.css";
+import { FC } from "react";
 
 type Task = {
   id: number;
@@ -11,25 +12,22 @@ type Task = {
   createdAt: string;
 };
 
-type TaskItemProps = {
+type Props = {
   task: Task;
   stageId: string;
+  onClick: (task: Task) => void;
 };
 
-const TaskItem = ({ task, stageId }: TaskItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ 
-    id: task.id.toString(),
-    data: {
-      stageId: Number(stageId),
-      position: task.position
-    }
-  });
+const TaskItem: FC<Props> = ({ task, stageId, onClick }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: task.id.toString(),
+      data: {
+        type: "task",
+        stageId: Number(stageId),
+        position: task.position,
+      },
+    });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -40,15 +38,24 @@ const TaskItem = ({ task, stageId }: TaskItemProps) => {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
       className={classes.taskItem}
-      data-stage-id={stageId}
-      data-position={task.position}
+      {...attributes}
     >
-      {task.title}
+      <div className={classes.content} {...listeners}>
+        {task.title}
+      </div>
+
+      <div className={classes.taskActions}>
+        <button
+          className={classes.menuButton}
+          onClick={() => onClick(task)}
+          aria-label="Task actions"
+        >
+          ⋮
+        </button>
+      </div>
     </div>
   );
 };
 
-export { TaskItem};
+export { TaskItem };
