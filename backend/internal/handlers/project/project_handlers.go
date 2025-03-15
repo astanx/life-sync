@@ -172,7 +172,7 @@ func GetProjects(db *gorm.DB) gin.HandlerFunc {
 
 func DeleteProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectIDStr := c.Param("id")
+		projectIDStr := c.Param("projectid")
 
 		if projectIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
@@ -226,7 +226,7 @@ func DeleteProject(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateLastOpenedProject(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectIDStr := c.Param("id")
+		projectIDStr := c.Param("projectid")
 
 		if projectIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
