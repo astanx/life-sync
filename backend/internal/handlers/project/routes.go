@@ -38,7 +38,7 @@ func SetupProjectRoutes(r *gin.RouterGroup, db *gorm.DB) {
 		taskRoutes.PATCH("", UpdateTaskPosition(db))
 	}
 
-	projectCollaboratorRoutes := projectRoutes.Group("/:id/collaborators")
+	projectCollaboratorRoutes := projectRoutes.Group("/:projectid/collaborators")
 	{
 		projectCollaboratorRoutes.POST("", AddCollaborator(db))
 		projectCollaboratorRoutes.DELETE("/:userId", RemoveCollaborator(db))

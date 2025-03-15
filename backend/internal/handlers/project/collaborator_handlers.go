@@ -14,7 +14,7 @@ import (
 
 func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectIDStr := c.Param("id")
+		projectIDStr := c.Param("projectid")
 
 		if projectIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
@@ -92,7 +92,7 @@ func AddCollaborator(db *gorm.DB) gin.HandlerFunc {
 
 func RemoveCollaborator(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectIDStr := c.Param("id")
+		projectIDStr := c.Param("projectid")
 
 		if projectIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
