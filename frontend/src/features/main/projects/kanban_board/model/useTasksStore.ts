@@ -1,9 +1,5 @@
 import { create } from "zustand";
-import {
-  Task,
-  TaskResponse,
-  tasksAPI,
-} from "@/features/main/projects/kanban_board/api";
+import { tasksAPI, Task, TaskResponse, Collaborator } from "@/features/main/projects/kanban_board/api";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 interface TasksStore {
@@ -39,6 +35,7 @@ interface TasksStore {
     newTitle: string,
     projectId: string
   ) => Promise<void>;
+  updateTaskCollaborators: (taskId: number, collaborators: Collaborator[]) => void;
 }
 
 const useTasksStore = create<TasksStore>()(
@@ -59,6 +56,7 @@ const useTasksStore = create<TasksStore>()(
             task.id === taskId ? { ...task, ...updates } : task
           ),
         })),
+
       removeTask: (taskId: number) =>
         set((state) => ({
           tasks: state.tasks.filter((t) => t.id !== taskId),
@@ -102,6 +100,7 @@ const useTasksStore = create<TasksStore>()(
             stageId: t.stage_id,
             projectId: t.project_id,
             createdAt: t.created_at,
+            collaborators: t.collaborators || [],
           }));
 
           set((state) => ({
@@ -114,6 +113,7 @@ const useTasksStore = create<TasksStore>()(
           console.error("Error loading tasks:", error);
         }
       },
+
       createTask: async (title, stageId, projectId) => {
         try {
           const response = await tasksAPI.createTask(
@@ -129,6 +129,7 @@ const useTasksStore = create<TasksStore>()(
             stageId: stageId,
             projectId: parseInt(projectId),
             createdAt: new Date().toISOString(),
+            collaborators: [],
           };
 
           set((state) => ({
@@ -139,8 +140,10 @@ const useTasksStore = create<TasksStore>()(
           throw error;
         }
       },
+
       updateIsOpenModalTasks: (isOpen: boolean) =>
         set(() => ({ isOpenModalTasks: isOpen })),
+
       deleteTask: async (taskId, stageId, projectId) => {
         try {
           await tasksAPI.deleteTask(taskId, stageId, projectId);
@@ -149,6 +152,7 @@ const useTasksStore = create<TasksStore>()(
           throw error;
         }
       },
+
       updateTaskTitle: async (taskId, newTitle, projectId) => {
         try {
           const task = useTasksStore
@@ -171,8 +175,16 @@ const useTasksStore = create<TasksStore>()(
           throw error;
         }
       },
+
       updateIsOpenModalTabs: (isOpen: boolean) =>
         set(() => ({ isOpenModalTabs: isOpen })),
+
+      updateTaskCollaborators: (taskId, collaborators) =>
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId ? { ...task, collaborators } : task
+          ),
+        })),
     }),
 
     {

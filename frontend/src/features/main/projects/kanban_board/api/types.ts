@@ -5,7 +5,9 @@ type TaskResponse = {
   stage_id: number;
   project_id: number;
   created_at: string;
+  collaborators: Collaborator[];
 };
+
 
 type Task = {
   id: number;
@@ -14,6 +16,13 @@ type Task = {
   stageId: number;
   projectId: number;
   createdAt: string;
+  collaborators: Collaborator[];
 };
 
-export type { Task, TaskResponse };
+
+type Collaborator = {
+  id: number;
+  email: string;
+};
+
+export type { Task, TaskResponse, Collaborator };

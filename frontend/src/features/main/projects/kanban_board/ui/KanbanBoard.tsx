@@ -10,7 +10,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import classes from "./KanbanBoard.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTasksStore } from "@/features/main/projects/kanban_board/model";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
@@ -118,6 +118,25 @@ const KanbanBoard = () => {
       setTargetState(null);
     }
   };
+
+  useEffect(() => {
+    if (!projectId) return;
+
+    const ws = new WebSocket(`ws://your-api-url/project/${projectId}/ws/tasks`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      switch (data.Type) {
+        case "update_collaborators":
+          useTasksStore.getState().updateTaskCollaborators(data.ID, data.Collaborators);
+          break;
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [projectId]);
 
   const handleColumnClick = (stageId: number) => {
     setActiveStageId(stageId);

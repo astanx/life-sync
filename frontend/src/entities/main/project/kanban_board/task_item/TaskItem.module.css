@@ -4,7 +4,6 @@
   margin-bottom: 0.75rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(33, 150, 243, 0.08);
-  cursor: grab;
   transition: 
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -15,6 +14,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 .taskItem:hover {
@@ -24,7 +24,6 @@
 }
 
 .taskItem:active {
-  cursor: grabbing;
   box-shadow: 0 6px 12px rgba(33, 150, 243, 0.15);
 }
 
@@ -41,24 +40,69 @@
     rgba(33, 150, 243, 0.1) 100%);
 }
 
-.taskActions {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0;
-  transition: opacity 0.2s ease;
+.dragHandle {
+  flex-grow: 1;
+  cursor: grab;
 }
 
-.taskItem:hover .taskActions {
-  opacity: 1;
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.collaborationInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collaboratorsBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #4dabf7;
+  font-size: 0.9rem;
+}
+
+.count {
+  font-weight: 500;
+}
+
+.actionsContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 8px;
+}
+
+.joinButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #74c0fc;
+  padding: 4px;
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+
+.joinButton:hover {
+  color: #4dabf7;
 }
 
 .menuButton {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
   color: #868e96;
   font-size: 1.2rem;
   line-height: 1;
@@ -69,7 +113,17 @@
   color: #495057;
 }
 
-.content {
-  flex-grow: 1;
-  padding-right: 30px;
+.icon {
+  font-size: 0.9rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
