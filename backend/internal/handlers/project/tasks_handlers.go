@@ -421,6 +421,12 @@ func AddTaskCollaborator(db *gorm.DB) gin.HandlerFunc {
 			UserID uint `json:"userId" binding:"required"`
 		}
 
+		if err := c.ShouldBindJSON(&payload); err != nil {
+			log.Printf("Bind error: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		projectID, err := strconv.ParseUint(projectIDStr, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
@@ -504,11 +510,6 @@ func RemoveTaskCollaborator(db *gorm.DB) gin.HandlerFunc {
 		currentUserID, err := middleware.GetCurrentUserID(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-			return
-		}
-
-		if !isProjectOwner(db, uint(projectID), currentUserID) && currentUserID != uint(userID) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 			return
 		}
 
