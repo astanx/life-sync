@@ -121,9 +121,9 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     if (!projectId) return;
-
+  
     const ws = new WebSocket(`ws://your-api-url/project/${projectId}/ws/tasks`);
-
+  
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       switch (data.Type) {
@@ -132,7 +132,7 @@ const KanbanBoard = () => {
           break;
       }
     };
-
+  
     return () => {
       ws.close();
     };

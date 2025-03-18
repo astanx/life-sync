@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { tasksAPI } from "@/features/main/projects/kanban_board/api";
 import { useParams } from "react-router-dom";
-import { useTasksStore } from "@/features/main/projects/kanban_board/model";
 import { useAuthStore } from "@/features/auth/model";
 
 type Props = {
@@ -19,7 +18,6 @@ type Props = {
 const TaskItem: FC<Props> = ({ task, stageId, onClick }) => {
   const { id } = useAuthStore();
   const { projectId } = useParams<{ projectId: string }>();
-  const { updateTaskCollaborators } = useTasksStore();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: task.id.toString(),
@@ -43,9 +41,13 @@ const TaskItem: FC<Props> = ({ task, stageId, onClick }) => {
     if (!id || !projectId) return;
     
     try {
-      await tasksAPI.addCollaborator(projectId, task.id.toString(), id, stageId);
-      const response = await tasksAPI.getCollaborators(projectId, task.id.toString());
-      updateTaskCollaborators(task.id, response.data);
+      await tasksAPI.addCollaborator(
+        projectId, 
+        task.id.toString(), 
+        id, 
+        task.stageId.toString()
+      );
+
     } catch (error) {
       console.error("Failed to join as collaborator:", error);
     }
