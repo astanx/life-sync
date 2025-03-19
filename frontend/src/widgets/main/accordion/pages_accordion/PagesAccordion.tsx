@@ -1,12 +1,10 @@
 import { Accordion } from "@/shared/ui/accordion";
 import {
   faCalendar,
-  faClipboardList,
   faHome,
   faMessage,
 } from "@fortawesome/free-solid-svg-icons";
 import classes from "./PagesAccordion.module.css";
-import { AddButton } from "@/shared/ui/add_button";
 import { CalendarContent } from "@/features/main/calendars/calendar_content/ui";
 import { ProjectsContent } from "@/features/main/projects/projects_content/ui";
 import { FC, useState } from "react";
@@ -31,16 +29,10 @@ const PagesAccordion: FC<Props> = ({ closeMenu }) => {
       id: 2,
     },
     {
-      title: "Tasks",
-      content: <AddButton title="Add new task" />,
-      icon: faClipboardList,
-      id: 3,
-    },
-    {
       title: "Calendar",
       content: <CalendarContent closeMenu={closeMenu} />,
       icon: faCalendar,
-      id: 4,
+      id: 3,
     },
   ];
   const [activeId, setActiveId] = useState(0);

@@ -1,8 +1,6 @@
 import { FC, useState } from "react";
 import { Logo } from "@/shared/ui/logo";
 import {
-  faBell,
-  faMessage,
   faUser,
   faBars,
   faTimes,
@@ -57,12 +55,6 @@ const Header: FC<HeaderProps> = ({ menuOpen, toggleMenu }) => {
       </div>
 
       <div className={classes.icons_container}>
-        <span>
-          <FontAwesomeIcon icon={faBell} className={classes.icon} />
-        </span>
-        <span>
-          <FontAwesomeIcon icon={faMessage} className={classes.icon} />
-        </span>
         <span onClick={handleProfileClick}>
           <FontAwesomeIcon icon={faUser} className={classes.icon} />
           {isProfileOpen && (
