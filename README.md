@@ -12,4 +12,4 @@
 ## Развернутые версии
 
 - **Backend**: [https://lifesync-backend.onrender.com](https://lifesync-backend.onrender.com)
-- **Frontend**: [https://lifesync-frontend.onrender.com](https://lifesync-frontend.onrender.com)
+- **Frontend**: [https://lifesync-frontend.onrender.com](https://lifesync-frontend.onrender.com)(При тестировании необходимо подождать ~1 минуту чтобы запустился сервер)
